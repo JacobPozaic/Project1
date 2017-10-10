@@ -1,0 +1,8 @@
+MapGen/.vs/
+MapGen/Binaries/
+MapGen/Config/
+MapGen/Content/
+MapGen/Intermediate/
+MapGen/Saved/
+MapGen.sln
+MapGen.uproject
