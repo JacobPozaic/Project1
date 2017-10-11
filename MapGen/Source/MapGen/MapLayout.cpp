@@ -91,7 +91,7 @@ void AMapLayout::BeginPlay() {
 	wall_ISMC->ClearInstances();						// Clear any instances already on the map
 
 	Room::ROOM_SIZE = ROOM_SIZE;						// Set the size of rooms for the Room class
-	Room::DOOR_OFFSET = (ROOM_SIZE / 2) - TILE_SIZE;	// Set the offset for doors in the Room class
+	Room::TILE_SIZE = TILE_SIZE;						// Set the size of tiles for the Room class
 	
 	rooms.clear();										// Clear any rooms stored from the last run
 	rooms.push_back(new Room());						// Create the first room in the map
@@ -109,11 +109,18 @@ void AMapLayout::BeginPlay() {
 	/* Start placing the objects in the world */
 	for (int i = 0; i < rooms.size(); i++) {						// For every room that was generated
 		Room *cur = rooms[i];										// Store a pointer to the current room
+
+		/* Place the floor for the room in the world */
 		floor_ISMC->AddInstance(cur->getWorldPosition());			// Create an instance of the floor mesh in the world location
 
 		/* Place doors in the world */
-		std::vector<FTransform> doorPos = cur->getDoorPositions();	// Get the location of all the doors in world space
+		std::vector<FTransform> doorPos = cur->getDoorPositions();	// Get the location of all the doors in the room
 		for (int j = 0; j < doorPos.size(); j++)					// For each door
 			door_ISMC->AddInstance(doorPos[j]);						// Create an instance of it in the world
+
+		/* Place walls around each room */
+		std::vector<FTransform> wallPos = cur->getWallPositions();	// Get the location of all the walls in the room
+		for (int j = 0; j < wallPos.size(); j++)					// For each wall
+			wall_ISMC->AddInstance(wallPos[j]);						// Create an instance of it in the world
 	}
 }
