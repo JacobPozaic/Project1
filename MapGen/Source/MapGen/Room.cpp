@@ -55,17 +55,17 @@ std::vector<FTransform> Room::getDoorPositions() {
 
 std::vector<FTransform> Room::getWallPositions() {
 	std::vector<FTransform> wallPositions;
-	int startX = worldX - EDGE_OFFSET - (TILE_SIZE / 2);
-	int endX = worldX + EDGE_OFFSET - (TILE_SIZE / 2);
-	int startY = worldY - EDGE_OFFSET - (TILE_SIZE / 2);
-	int endY = worldY + EDGE_OFFSET - (TILE_SIZE / 2);
-	for (int i = 0; i < ROOM_SIZE - TILE_SIZE; i+=TILE_SIZE) {
+	float startX = worldX - EDGE_OFFSET;
+	float endX = worldX + EDGE_OFFSET;
+	float startY = worldY - EDGE_OFFSET;
+	float endY = worldY + EDGE_OFFSET;
+	for (int i = 0; i < ROOM_SIZE - TILE_SIZE; i += (TILE_SIZE * 2)) {
 		FTransform wall = FTransform(FVector(startX + i, startY, 0));
 		wallPositions.push_back(wall);
 		wall = FTransform(FVector(startX + i, endY, 0));
 		wallPositions.push_back(wall);
 	}
-	for (int i = TILE_SIZE; i < ROOM_SIZE - TILE_SIZE; i += TILE_SIZE) {
+	for (int i = TILE_SIZE; i < ROOM_SIZE - TILE_SIZE; i += (TILE_SIZE * 2)) {
 		FTransform wall = FTransform(FVector(startX, startY + i, 0));
 		wallPositions.push_back(wall);
 		wall = FTransform(FVector(endX, startY + i, 0));
