@@ -1,0 +1,15 @@
+bug:
+material does not render on floor
+
+solution:
+materials have a flag for being used for instanced meshes and must be enabled, also the original floor mesh did not have UV maps generated
+
+vectors only use copy, kill me
+
+creating cpp or h files in vs on a UE project does not put them in the source folder, it puts them in a seperate folder but the VS solution explorer shows that it is in the sources directory so at compile time it cannot find the files because they arent actually there
+
+Had to remove a light weight representation of a Room type class because i cant return a pointer to a Room in a function because the Room class is not defined at that time (maybe, compiler and google are as vague as possible)
+
+Doorways are spawned by not adding walls within the width of a door from its position, occationally walls would not be placed where there is no door.  the fix was to set the defult location of the doorway for that side (door positions are cached but cant be null) to ROOM_SIZE + worldX/Y + DOOR_WIDTH because ROOM_SIZE*2 does not account for worldX/Y changing meaning somtimes abs(doorlocation - ROOM_SIZE*2) could be in range of where the door shoudl be, i figured this out because it only occured on rooms far from the origin and only on walls that did not have a door
+
+only 1 time ever walls spawned in a door way, and ive not been able to recreate it at all
