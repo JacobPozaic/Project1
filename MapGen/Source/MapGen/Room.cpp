@@ -11,17 +11,22 @@ Room::Room(int x, int y, int dir, Room* last) {
 	this->last = last;
 
 	EDGE_OFFSET = (ROOM_SIZE / 2) - (TILE_SIZE/2);
-	DOOR_OFF_RNG = (ROOM_SIZE / 2) - (4 * TILE_SIZE); // doors are 4 tiles wide + keeps doors atleast 2 tiles from a corner
+	DOOR_OFF_RNG = (ROOM_SIZE / TILE_SIZE) / 2 - 4; // doors are 4 tiles wide + keeps doors atleast 2 tiles from a corner
 
 	this->worldX = x * ROOM_SIZE;
 	this->worldY = y * ROOM_SIZE;
+
+	left = ROOM_SIZE + worldY + DOOR_WIDTH;
+	above = ROOM_SIZE + worldX + DOOR_WIDTH;
+	right = ROOM_SIZE + worldY + DOOR_WIDTH;
+	below = ROOM_SIZE + worldX + DOOR_WIDTH;
 }
 
 void Room::addDoor() {
 	Coord doorPos;
 	doorPos.x = 0;
 	doorPos.y = 0;
-	int door_offset = FMath::RandRange(-DOOR_OFF_RNG, DOOR_OFF_RNG);
+	int door_offset = FMath::RandRange(-DOOR_OFF_RNG, DOOR_OFF_RNG) * TILE_SIZE;
 	switch (this->dir) {
 	case 0: 
 		doorPos.x -= EDGE_OFFSET;

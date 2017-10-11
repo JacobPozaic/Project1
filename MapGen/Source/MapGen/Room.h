@@ -15,16 +15,16 @@ private:
 	int worldY;										// coodinate location of this room in world units
 
 	int EDGE_OFFSET;								// constant value for the offset from the center of a room to the edge
-	float DOOR_OFF_RNG;								// constant value for how far a door can be offset from the center of a wall
+	int DOOR_OFF_RNG;								// constant value for how far a door can be offset from the center of a wall
 
 	Room* last;										// stores a pointer to the previous room in the chain
 
 	std::vector<Coord> doors;						// stores the location of each door in the room
 
-	float left = ROOM_SIZE*2;
-	float above = ROOM_SIZE*2;
-	float right = ROOM_SIZE*2;
-	float below = ROOM_SIZE*2;
+	float left;
+	float above;
+	float right;
+	float below;
 
 	/**
 	 * Gets the side of a room a door is on
