@@ -1,76 +1,4 @@
 #include "MapLayout.h"
-#include <vector>
-
-/** 
- * Helps me keep track of what numbers are what direction.  used when talking about rooms in relation to eachother
- */
-enum Direction { NONE = -1, LEFT = 0, ABOVE = 1, RIGHT = 2, DOWN = 3 };
-
-/**
- * An object that represents an individual room in the level
- */
-class Room {
-public:
-	int x;											// coordinate location of this room in the world
-	int y;											// coordinate location of this room in the world
-	int dir;										// stores the direction to the previous room
-
-	std::vector<int> doors;							// stores the direction each door should be in to adjacent rooms
-
-	Room(int x = 0, int y = 0, int dir = NONE, Room* last = NULL) {
-		this->x = x;
-		this->y = y;
-		this->dir = dir;
-		if (dir != NONE) {
-			this->doors.push_back(dir);				// if the room was not the first room then create a door to the last room
-			last->addDoor(dir);						// add a door from the last room to this one
-		}
-	}
-
-	/**
-	 * Add a door to the previous room in the chain (flip direction)
-	 */
-	void addDoor(int dir) {
-		switch (dir) {
-		case LEFT: this->doors.push_back(RIGHT); break;
-		case ABOVE: this->doors.push_back(DOWN); break;
-		case RIGHT:	this->doors.push_back(LEFT); break;
-		case DOWN: this->doors.push_back(ABOVE); break;
-		}
-	}
-
-	/**
-	 * Checks if this room already exists at the given coordinates
-	 */
-	bool posEquals(int x, int y) {
-		if (this->x == x && this->y == y)
-			return true;
-		return false;
-	}
-};
-
-/**
- * A light-Weight representation of a Room, used when creating extension rooms to cut down on overhead for potential rooms that are not used. (probably a resurce leak regardless)
- */
-class RoomPos {
-public:
-	int x;											// coordinate location of this room in the world
-	int y;											// coordinate location of this room in the world
-	int dir;										// stores the direction to the previous room
-
-	RoomPos(int x, int y, int dir) {
-		this->x = x;
-		this->y = y;
-		this->dir = dir;
-	}
-
-	/**
-	 * Creates a Room object out of the data in this prototype and returns a pointer to it
-	 */
-	Room* createRoom(Room* lastRoom) {
-		return new Room(x, y, dir, lastRoom);
-	}
-};
 
 std::vector<Room*> rooms;							// stores a pointer to each room in the map
 
@@ -93,9 +21,9 @@ Room* genNextRoom() {
 	int x = last->x;						// get the x position of the last room
 	int y = last->y;						// get the y position of the last room
 	switch (dir) {							// calculate the coordinate of the new room going in the random direction
-	case LEFT: x = last->x + 1; break;		// if the new room is to the left, x = last.x + 1
-	case ABOVE: y = last->y + 1; break;		// if the new room is above, y = last.y + 1
-	case RIGHT:	x = last->x - 1; break;		// if the new room is to the right, x = last.x - 1
+	case 0: x = last->x + 1; break;			// if the new room is to the left, x = last.x + 1
+	case 1: y = last->y + 1; break;			// if the new room is above, y = last.y + 1
+	case 2:	x = last->x - 1; break;			// if the new room is to the right, x = last.x - 1
 	}
 	if (!validLoc(x, y))					// check if the location of the new room is not already occupied by another room
 		return genNextRoom();				// if the room wasnt valid then try again (random has a good chance not to try the same direction again) [can RARELY cause a stack overflow]
@@ -108,29 +36,30 @@ Room* genNextRoom() {
  * @param extend The number of recursive extensions should be made on this tile (dont make this big, like 2..3 is sufficent)
  */
 void genExtRooms(Room* current, int extend) {
-	std::vector<RoomPos*> validPos;										// stores a pointer to each RoomPosition that is in a valid location
+	std::vector<Room*> validPos;									// stores a pointer to each RoomPosition that is in a valid location
 
 	int x = current->x + 1;
 	int y = current->y;
-	if (validLoc(x, y)) validPos.push_back(new RoomPos(x, y, LEFT));	// Create a temporary room to the left if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 0));		// Create a temporary room to the left if there is no room already there
 	x = current->x;
 	y = current->y + 1;
-	if (validLoc(x, y)) validPos.push_back(new RoomPos(x, y, ABOVE));	// Create a temporary room above if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 1));		// Create a temporary room above if there is no room already there
 	x = current->x - 1;
 	y = current->y;
-	if (validLoc(x, y)) validPos.push_back(new RoomPos(x, y, RIGHT));	// Create a temporary room to the right if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 2));		// Create a temporary room to the right if there is no room already there
 	x = current->x;
 	y = current->y - 1;
-	if (validLoc(x, y)) validPos.push_back(new RoomPos(x, y, DOWN));	// Create a temporary room below if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 3));		// Create a temporary room below if there is no room already there
 
-	int numRooms = FMath::RandRange(0, 2);								// pick a random number of rooms to add onto the current room (0..2)
-	while (numRooms-- > 0 && validPos.size() > 0) {						// while we should still add another room and there is another valid location for an adjacent room
-		int index = FMath::RandRange(0, validPos.size()-1);				// randomly pick one of the available RoomPos 
-		Room *nextRoom = validPos[index]->createRoom(current);			// create a Room from the RoomPos
-		rooms.push_back(nextRoom);										// add the new Room's pointer to the list of rooms
-		if (extend > 0) genExtRooms(nextRoom, extend-1);				// recursively call self so that each extension room on the main chain has a chance to be extended farther
-		validPos[index] = validPos.back();								// overwrite the used RoomPos in the list of availble rooms to remove it from the list
-		validPos.pop_back();											// remove the duplicate created by the overwrite
+	int numRooms = FMath::RandRange(0, 2);							// pick a random number of rooms to add onto the current room (0..2)
+	while (numRooms-- > 0 && validPos.size() > 0) {					// while we should still add another room and there is another valid location for an adjacent room
+		int index = FMath::RandRange(0, validPos.size()-1);			// randomly pick one of the available Rooms
+		Room *nextRoom = validPos[index];							// get the chosen room from the list of valid rooms
+		current->addDoor(nextRoom->dir);							// add a door to the current room to the new room
+		rooms.push_back(nextRoom);									// add the new Room's pointer to the list of rooms
+		if (extend > 0) genExtRooms(nextRoom, extend-1);			// recursively call self so that each extension room on the main chain has a chance to be extended farther
+		validPos[index] = validPos.back();							// overwrite the used Room in the list of availble rooms to remove it from the list
+		validPos.pop_back();										// remove the duplicate created by the overwrite
 	}
 }
 
@@ -143,47 +72,48 @@ AMapLayout::AMapLayout() {
 
 	door_ISMC = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Door Instances"));				// create the instanced mesh component for placing doors between each room
 	door_ISMC->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);				// make it a child of the root component
+
+	wall_ISMC = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Wall Instances"));				// create the instanced mesh component for placing walls
+	wall_ISMC->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);				// make it a child of the root component
 }
 
 // Called when the game starts
 void AMapLayout::BeginPlay() {
+	/* Setup variables and clearing old information */
 	Super::BeginPlay();
-	this->RegisterAllComponents();
-	floor_ISMC->SetStaticMesh(FloorMesh);
-	floor_ISMC->ClearInstances();
-
-	door_ISMC->SetStaticMesh(DoorMesh);
-	door_ISMC->ClearInstances();
+	this->RegisterAllComponents();						// Make sure all components are registered
 	
-	rooms.clear();
-	rooms.push_back(new Room());
+	floor_ISMC->SetStaticMesh(FloorMesh);				// Set the mesh to use for the floor
+	floor_ISMC->ClearInstances();						// Clear any instances already on the map
+	door_ISMC->SetStaticMesh(DoorMesh);					// Set the mesh to use for the doors
+	door_ISMC->ClearInstances();						// Clear any instances already on the map
+	wall_ISMC->SetStaticMesh(WallMesh);					// Set the mesh to use for the walls in each room
+	wall_ISMC->ClearInstances();						// Clear any instances already on the map
 
-	int roomCount = FMath::RandRange(MAIN_CHAIN_MIN, MAIN_CHAIN_RAND + MAIN_CHAIN_MIN);
+	Room::ROOM_SIZE = ROOM_SIZE;						// Set the size of rooms for the Room class
+	Room::DOOR_OFFSET = (ROOM_SIZE / 2) - TILE_SIZE;	// Set the offset for doors in the Room class
+	
+	rooms.clear();										// Clear any rooms stored from the last run
+	rooms.push_back(new Room());						// Create the first room in the map
 
-	for (int i = 0; i < roomCount; i++)
-		rooms.push_back(genNextRoom());
+	int roomCount = FMath::RandRange(MAIN_CHAIN_MIN, MAIN_CHAIN_RAND + MAIN_CHAIN_MIN);		// Calculate how many rooms should be in the main chain of rooms
 
-	for (int i = 0; i < roomCount - 1; i++)
-		genExtRooms(rooms[i], EXT_LENGTH);
+	/* Generate the main chain of rooms */
+	for (int i = 0; i < roomCount; i++)								// For each room that should be created
+		rooms.push_back(genNextRoom());								// Generate a new room in a valid location adjacent to the previous room
 
-	for (int i = 0; i < rooms.size(); i++) {
-		Room *cur = rooms[i];
-		FTransform trans = FTransform(FVector(cur->x * ROOM_SIZE, cur->y * ROOM_SIZE, 0));
-		floor_ISMC->AddInstance(trans);
+	/* Generate extension rooms branching off the main chain of rooms */
+	for (int i = 0; i < roomCount - 1; i++)							// For all rooms in the main chain besides the last room (the exit)
+		genExtRooms(rooms[i], EXT_LENGTH);							// Generate rooms that branch off in different directions
 
-		int doorCount = cur->doors.size();
-		for (int j = 0; j < doorCount; j++) {
-			int x = cur->x * ROOM_SIZE;
-			int y = cur->y * ROOM_SIZE;
-			switch (cur->doors[j]) {
-			case 0: x -= DOOR_OFFSET; break;
-			case 1:	y -= DOOR_OFFSET; break;
-			case 2:	x += DOOR_OFFSET; break;
-			case 3:	y += DOOR_OFFSET; break;
-			}
-			FTransform trans_door = FTransform(FVector(x, y, 0));
-			trans_door.SetRotation(FQuat::MakeFromEuler({0.f, 0.f, 90.0f * (cur->doors[j])}));
-			door_ISMC->AddInstance(trans_door);
-		}
+	/* Start placing the objects in the world */
+	for (int i = 0; i < rooms.size(); i++) {						// For every room that was generated
+		Room *cur = rooms[i];										// Store a pointer to the current room
+		floor_ISMC->AddInstance(cur->getWorldPosition());			// Create an instance of the floor mesh in the world location
+
+		/* Place doors in the world */
+		std::vector<FTransform> doorPos = cur->getDoorPositions();	// Get the location of all the doors in world space
+		for (int j = 0; j < doorPos.size(); j++)					// For each door
+			door_ISMC->AddInstance(doorPos[j]);						// Create an instance of it in the world
 	}
 }

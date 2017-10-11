@@ -1,9 +1,10 @@
 #pragma once
-
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Engine.h"
+#include "GameFramework/Actor.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include <vector>
+#include "Room.h"
 #include "MapLayout.generated.h"
 
 UCLASS()
@@ -19,20 +20,22 @@ public:
 		int EXT_LENGTH = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int ROOM_SIZE = 100;
+		int ROOM_SIZE = 200;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		int TILE_SIZE = 5;
-	UPROPERTY(VisibleAnywhere, Category = "Map Generation")
-		int DOOR_OFFSET = (ROOM_SIZE / 2) - TILE_SIZE;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		UStaticMesh* FloorMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		UStaticMesh* DoorMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
+		UStaticMesh* WallMesh;
 	UPROPERTY()
 		UInstancedStaticMeshComponent* floor_ISMC;
 	UPROPERTY()
 		UInstancedStaticMeshComponent* door_ISMC;
+	UPROPERTY()
+		UInstancedStaticMeshComponent* wall_ISMC;
 
 	AMapLayout();
 
