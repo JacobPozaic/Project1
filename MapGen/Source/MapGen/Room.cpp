@@ -2,6 +2,7 @@
 
 int Room::ROOM_SIZE;
 int Room::TILE_SIZE;
+float Room::DOOR_WIDTH;
 
 Room::Room(int x, int y, int dir, Room* last) {
 	this->x = x;
@@ -25,18 +26,22 @@ void Room::addDoor() {
 	case 0: 
 		doorPos.x -= EDGE_OFFSET;
 		doorPos.y += door_offset;
+		left = doorPos.y + worldY;
 		break;
 	case 1:	
 		doorPos.y -= EDGE_OFFSET;
 		doorPos.x += door_offset;
+		above = doorPos.x + worldX;
 		break;
 	case 2:	
 		doorPos.x += EDGE_OFFSET;
 		doorPos.y += door_offset;
+		right = doorPos.y + worldY;
 		break;
 	case 3:	
 		doorPos.y += EDGE_OFFSET;
 		doorPos.x += door_offset;
+		below = doorPos.x + worldX;
 		break;
 	}
 	
@@ -49,7 +54,21 @@ void Room::addDoorEntrance(Coord doorPos) {
 		doorPos.x = -doorPos.x;
 	else if (abs(doorPos.y) == EDGE_OFFSET)
 		doorPos.y = -doorPos.y;
+	
+	switch (getDoorSide(doorPos)) {
+	case 0: left = doorPos.y + worldY; break;
+	case 1:	above = doorPos.x + worldX; break;
+	case 2:	right = doorPos.y + worldY; break;
+	case 3:	below = doorPos.x + worldX; break;
+	}
 	this->doors.push_back(doorPos);
+}
+
+int Room::getDoorSide(Coord door) {
+	if (door.x == -EDGE_OFFSET) return 0;
+	else if (door.y == -EDGE_OFFSET) return 1;
+	else if (door.x == EDGE_OFFSET) return 2;
+	return 3; //else if (door.y == EDGE_OFFSET) , This will never be somthing else because a Door will always have 1 coordinate = EDGE_OFFSET
 }
 
 bool Room::posEquals(int x, int y) {
@@ -66,13 +85,8 @@ std::vector<FTransform> Room::getDoorPositions() {
 	std::vector<FTransform> doorPositions;
 	for (int i = 0; i < this->doors.size(); i++) {
 		Coord door = doors[i];
-		float dir;
-		if (door.x == -EDGE_OFFSET) dir = 0.0f;
-		else if (door.y == -EDGE_OFFSET) dir = 90.0f;
-		else if (door.x == EDGE_OFFSET) dir = 180.0f;
-		else if (door.y == EDGE_OFFSET) dir = 270.0f;
 		FTransform trans_door = FTransform(FVector(door.x + worldX, door.y + worldY, 0));
-		trans_door.SetRotation(FQuat::MakeFromEuler({ 0.f, 0.f, dir }));
+		trans_door.SetRotation(FQuat::MakeFromEuler({ 0.f, 0.f, getDoorSide(door) * 90.0f }));
 		doorPositions.push_back(trans_door);
 	}
 	return doorPositions;
@@ -84,25 +98,30 @@ std::vector<FTransform> Room::getWallPositions() {
 	float endX = worldX + EDGE_OFFSET;
 	float startY = worldY - EDGE_OFFSET;
 	float endY = worldY + EDGE_OFFSET;
+
+	/* Calculate wall positions around the edge of the room */
 	Coord wall;
 	for (int i = 0; i < ROOM_SIZE; i += TILE_SIZE) {
 		wall.x = startX + i;
 		wall.y = startY;
-		wallPositions.push_back(wall);
+		if(abs(wall.x - above) >= DOOR_WIDTH)
+			wallPositions.push_back(wall);
 		wall.x = startX + i;
 		wall.y = endY;
-		wallPositions.push_back(wall);
+		if(abs(wall.x - below) >= DOOR_WIDTH)
+			wallPositions.push_back(wall);
 	}
 	for (int i = TILE_SIZE; i < ROOM_SIZE - TILE_SIZE; i += TILE_SIZE) {
 		wall.x = startX;
 		wall.y = startY + i;
-		wallPositions.push_back(wall);
+		if (abs(wall.y - left) >= DOOR_WIDTH)
+			wallPositions.push_back(wall);
 		wall.x = endX;
 		wall.y = startY + i;
-		wallPositions.push_back(wall);
+		if (abs(wall.y - right) >= DOOR_WIDTH)
+			wallPositions.push_back(wall);
 	}
 
-	//TODO negotiate where doors are and remove those walls
 	std::vector<FTransform> walls;
 	for (int i = 0; i < wallPositions.size(); i++) {
 		Coord wall = wallPositions[i];

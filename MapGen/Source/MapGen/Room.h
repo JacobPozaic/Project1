@@ -21,6 +21,16 @@ private:
 
 	std::vector<Coord> doors;						// stores the location of each door in the room
 
+	float left = ROOM_SIZE*2;
+	float above = ROOM_SIZE*2;
+	float right = ROOM_SIZE*2;
+	float below = ROOM_SIZE*2;
+
+	/**
+	 * Gets the side of a room a door is on
+	 */
+	int getDoorSide(Coord door);
+
 public:
 	int x;											// coordinate location of this room in relation to other rooms
 	int y;											// coordinate location of this room in relation to other rooms
@@ -28,6 +38,7 @@ public:
 
 	static int ROOM_SIZE;							// constant value for the size in world units of each room
 	static int TILE_SIZE;							// constant value for the size of each tile in world units
+	static float DOOR_WIDTH;
 
 	Room(int x = 0, int y = 0, int dir = -1, Room* last = NULL);
 

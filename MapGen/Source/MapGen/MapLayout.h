@@ -23,6 +23,8 @@ public:
 		int ROOM_SIZE = 200;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		int TILE_SIZE = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
+		float DOOR_WIDTH = 1.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		UStaticMesh* FloorMesh;

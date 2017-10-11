@@ -94,6 +94,7 @@ void AMapLayout::BeginPlay() {
 
 	Room::ROOM_SIZE = ROOM_SIZE;						// Set the size of rooms for the Room class
 	Room::TILE_SIZE = TILE_SIZE;						// Set the size of tiles for the Room class
+	Room::DOOR_WIDTH = DOOR_WIDTH * TILE_SIZE;			// Set the size of doorways for the Room class
 	
 	rooms.clear();										// Clear any rooms stored from the last run
 	rooms.push_back(new Room());						// Create the first room in the map
