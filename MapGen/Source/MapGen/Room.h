@@ -6,10 +6,20 @@
  */
 class MAPGEN_API Room {
 private:
-	int EDGE_OFFSET;								// constant value for the offset from the center of a room to the edge
+	struct Coord {									// stores the real world coordinates of components in the room, ex: walls, doors
+		float x;									// the x position of the object
+		float y;									// the y position of the object
+	};
 
 	int worldX;										// coodinate location of this room in world units
 	int worldY;										// coodinate location of this room in world units
+
+	int EDGE_OFFSET;								// constant value for the offset from the center of a room to the edge
+	float DOOR_OFF_RNG;								// constant value for how far a door can be offset from the center of a wall
+
+	Room* last;										// stores a pointer to the previous room in the chain
+
+	std::vector<Coord> doors;						// stores the location of each door in the room
 
 public:
 	int x;											// coordinate location of this room in relation to other rooms
@@ -19,14 +29,17 @@ public:
 	static int ROOM_SIZE;							// constant value for the size in world units of each room
 	static int TILE_SIZE;							// constant value for the size of each tile in world units
 
-	std::vector<int> doors;							// stores the direction each door should be in to adjacent rooms
-
 	Room(int x = 0, int y = 0, int dir = -1, Room* last = NULL);
 
 	/**
-	 * Add a door to the previous room in the chain (flip direction)
+	 * Add a door between this room and the previous room in the chain
 	 */
-	void addDoor(int dir);
+	void addDoor();
+
+	/**
+	* Add a door between this room and the previous room in the chain
+	*/
+	void addDoorEntrance(Coord doorPos);
 
 	/**
 	 * Checks if this room already exists at the given coordinates

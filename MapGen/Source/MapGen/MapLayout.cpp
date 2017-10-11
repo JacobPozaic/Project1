@@ -27,7 +27,9 @@ Room* genNextRoom() {
 	}
 	if (!validLoc(x, y))					// check if the location of the new room is not already occupied by another room
 		return genNextRoom();				// if the room wasnt valid then try again (random has a good chance not to try the same direction again) [can RARELY cause a stack overflow]
-	return new Room(x, y, dir, last);		// return a pointer to the new room
+	Room* next = new Room(x, y, dir, last);	// get a pointer to the new room
+	next->addDoor();						// create a doorway between this room and the last room
+	return next;							// return a pointer to the new room
 }
 
 /**
@@ -36,26 +38,26 @@ Room* genNextRoom() {
  * @param extend The number of recursive extensions should be made on this tile (dont make this big, like 2..3 is sufficent)
  */
 void genExtRooms(Room* current, int extend) {
-	std::vector<Room*> validPos;									// stores a pointer to each RoomPosition that is in a valid location
+	std::vector<Room*> validPos;											// stores a pointer to each RoomPosition that is in a valid location
 
 	int x = current->x + 1;
 	int y = current->y;
-	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 0));		// Create a temporary room to the left if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 0, current));		// Create a temporary room to the left if there is no room already there
 	x = current->x;
 	y = current->y + 1;
-	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 1));		// Create a temporary room above if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 1, current));		// Create a temporary room above if there is no room already there
 	x = current->x - 1;
 	y = current->y;
-	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 2));		// Create a temporary room to the right if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 2, current));		// Create a temporary room to the right if there is no room already there
 	x = current->x;
 	y = current->y - 1;
-	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 3));		// Create a temporary room below if there is no room already there
+	if (validLoc(x, y)) validPos.push_back(new Room(x, y, 3, current));		// Create a temporary room below if there is no room already there
 
 	int numRooms = FMath::RandRange(0, 2);							// pick a random number of rooms to add onto the current room (0..2)
 	while (numRooms-- > 0 && validPos.size() > 0) {					// while we should still add another room and there is another valid location for an adjacent room
 		int index = FMath::RandRange(0, validPos.size()-1);			// randomly pick one of the available Rooms
 		Room *nextRoom = validPos[index];							// get the chosen room from the list of valid rooms
-		current->addDoor(nextRoom->dir);							// add a door to the current room to the new room
+		nextRoom->addDoor();										// create a door between the new room and the current room
 		rooms.push_back(nextRoom);									// add the new Room's pointer to the list of rooms
 		if (extend > 0) genExtRooms(nextRoom, extend-1);			// recursively call self so that each extension room on the main chain has a chance to be extended farther
 		validPos[index] = validPos.back();							// overwrite the used Room in the list of availble rooms to remove it from the list
