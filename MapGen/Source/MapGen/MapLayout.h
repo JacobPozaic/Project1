@@ -22,7 +22,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		int ROOM_SIZE = 200;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int TILE_SIZE = 5;
+		int TILE_SIZE = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		UStaticMesh* FloorMesh;

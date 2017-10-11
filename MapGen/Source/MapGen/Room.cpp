@@ -9,7 +9,7 @@ Room::Room(int x, int y, int dir, Room* last) {
 	this->dir = dir;
 	this->last = last;
 
-	EDGE_OFFSET = (ROOM_SIZE / 2) - TILE_SIZE;
+	EDGE_OFFSET = (ROOM_SIZE / 2) - (TILE_SIZE/2);
 	DOOR_OFF_RNG = (ROOM_SIZE / 2) - (4 * TILE_SIZE); // doors are 4 tiles wide + keeps doors atleast 2 tiles from a corner
 
 	this->worldX = x * ROOM_SIZE;
@@ -85,7 +85,7 @@ std::vector<FTransform> Room::getWallPositions() {
 	float startY = worldY - EDGE_OFFSET;
 	float endY = worldY + EDGE_OFFSET;
 	Coord wall;
-	for (int i = 0; i < ROOM_SIZE - TILE_SIZE; i += (TILE_SIZE * 2)) {
+	for (int i = 0; i < ROOM_SIZE; i += TILE_SIZE) {
 		wall.x = startX + i;
 		wall.y = startY;
 		wallPositions.push_back(wall);
@@ -93,7 +93,7 @@ std::vector<FTransform> Room::getWallPositions() {
 		wall.y = endY;
 		wallPositions.push_back(wall);
 	}
-	for (int i = TILE_SIZE; i < ROOM_SIZE - TILE_SIZE; i += (TILE_SIZE * 2)) { // bug: walls across y axis are shifted half tile
+	for (int i = TILE_SIZE; i < ROOM_SIZE - TILE_SIZE; i += TILE_SIZE) {
 		wall.x = startX;
 		wall.y = startY + i;
 		wallPositions.push_back(wall);
