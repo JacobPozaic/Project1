@@ -3,28 +3,27 @@
 #include "Engine.h"
 #include "GameFramework/Actor.h"
 #include "Components/InstancedStaticMeshComponent.h"
-#include <vector>
 #include "Room.h"
 #include "MapLayout.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class MAPGEN_API AMapLayout : public AActor {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int MAIN_CHAIN_MIN = 5;
+		int32 MAIN_CHAIN_MIN = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int MAIN_CHAIN_RAND = 4;
+		int32 MAIN_CHAIN_RAND = 4;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int EXT_LENGTH = 3;
+		int32 EXT_LENGTH = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int ROOM_SIZE = 200;
+		int32 ROOM_SIZE = 200;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int TILE_SIZE = 10;
+		int32 TILE_SIZE = 10;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		float DOOR_WIDTH = 1.5f;
+		float DOOR_WIDTH = 3.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		UStaticMesh* FloorMesh;
@@ -40,6 +39,26 @@ public:
 		UInstancedStaticMeshComponent* wall_ISMC;
 
 	AMapLayout();
+
+private:
+	TArray<URoom*> rooms;							// stores a pointer to each room in the map
+
+	/**
+	 * Checks if a there is a room that already exists at a given coordinate
+	 */
+	bool validLoc(int32 x, int32 y);
+
+	/**
+	* Generates a new room in the main chain of rooms
+	*/
+	URoom* genNextRoom();
+
+	/**
+	* Generates any rooms that extend off of the main chain.
+	* @param current A pointer to the Room that extensions should be added on to
+	* @param extend The number of recursive extensions should be made on this tile (dont make this big, like 2..3 is sufficent)
+	*/
+	void genExtRooms(URoom* current, int32 extend);
 
 protected:
 	// Called when the game starts or when spawned
