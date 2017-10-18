@@ -19,49 +19,40 @@ URoom* AMapLayout::genNextRoom() {
 	}
 	if (!validLoc(x, y))						// check if the location of the new room is not already occupied by another room
 		return genNextRoom();					// if the room wasnt valid then try again (random has a good chance not to try the same direction again) [can RARELY cause a stack overflow]
-	URoom* next = NewObject<URoom>(); 
-	next->Init(x, y, dir, last);				// get a pointer to the new room
-	next->addDoor();							// create a doorway between this room and the last room
+	URoom* next = FRoomBuilder::BuildRoom(x, y, dir, last);
 	return next;								// return a pointer to the new room
 } 
 
 void AMapLayout::genExtRooms(URoom* current, int32 extend) {
-	TArray<URoom*> validPos;										// stores a pointer to each RoomPosition that is in a valid location
+	TArray<FCoord> validPos;										// stores a pointer to each RoomPosition that is in a valid location
 
-	int32 x = current->x + 1;
-	int32 y = current->y;
-	if (validLoc(x, y)) {
-		URoom* left = NewObject<URoom>();
-		left->Init(x, y, 0, current);
-		validPos.Add(left);											// Create a temporary room to the left if there is no room already there
-	}
-	x = current->x;
-	y = current->y + 1;
-	if (validLoc(x, y)) {
-		URoom* above = NewObject<URoom>();
-		above->Init(x, y, 1, current);
-		validPos.Add(above);										// Create a temporary room above if there is no room already there
-	}
-	x = current->x - 1;
-	y = current->y;
-	if (validLoc(x, y)) {
-		URoom* right = NewObject<URoom>();
-		right->Init(x, y, 2, current);
-		validPos.Add(right);										// Create a temporary room to the right if there is no room already there
-	}
-	x = current->x;
-	y = current->y - 1;
-	if (validLoc(x, y)) {
-		URoom* below = NewObject<URoom>();
-		below->Init(x, y, 3, current);
-		validPos.Add(below);										// Create a temporary room below if there is no room already there
-	}
-
+	FCoord loc;
+	loc.x = current->x + 1;
+	loc.y = current->y;
+	loc.r = 0;
+	if (validLoc(loc.x, loc.y)) 
+		validPos.Add(loc);											// Create a temporary room to the left if there is no room already there
+	loc.x = current->x;
+	loc.y = current->y + 1;
+	loc.r = 1;
+	if (validLoc(loc.x, loc.y))
+		validPos.Add(loc);											// Create a temporary room above if there is no room already there
+	loc.x = current->x - 1;
+	loc.y = current->y;
+	loc.r = 2;
+	if (validLoc(loc.x, loc.y))
+		validPos.Add(loc);											// Create a temporary room to the right if there is no room already there
+	loc.x = current->x;
+	loc.y = current->y - 1;
+	loc.r = 3;
+	if (validLoc(loc.x, loc.y))
+		validPos.Add(loc);											// Create a temporary room below if there is no room already there
+	
 	int32 numRooms = FMath::RandRange(0, 2);						// pick a random number of rooms to add onto the current room (0..2)
 	while (numRooms-- > 0 && validPos.Num() > 0) {					// while we should still add another room and there is another valid location for an adjacent room
 		int32 index = FMath::RandRange(0, validPos.Num() - 1);		// randomly pick one of the available Rooms
-		URoom* nextRoom = validPos[index];							// get the chosen room from the list of valid rooms
-		nextRoom->addDoor();										// create a door between the new room and the current room
+		FCoord l = validPos[index];
+		URoom* nextRoom = FRoomBuilder::BuildRoom(l.x, l.y, l.r, current);			// get the chosen room from the list of valid rooms
 		rooms.Add(nextRoom);										// add the new Room's pointer to the list of rooms
 		if (extend > 0) genExtRooms(nextRoom, extend - 1);			// recursively call self so that each extension room on the main chain has a chance to be extended farther
 		validPos.RemoveAt(index, 1, true);							// remove it from the list
@@ -95,14 +86,10 @@ void AMapLayout::BeginPlay() {
 	wall_ISMC->SetStaticMesh(WallMesh);			// Set the mesh to use for the walls in each room
 	wall_ISMC->ClearInstances();				// Clear any instances already on the map
 
-	URoom::ROOM_SIZE = ROOM_SIZE;				// Set the size of rooms for the Room class
-	URoom::TILE_SIZE = TILE_SIZE;				// Set the size of tiles for the Room class
-	URoom::DOOR_WIDTH = DOOR_WIDTH * TILE_SIZE;	// Set the size of doorways for the Room class
-	URoom::EDGE_OFFSET = (ROOM_SIZE / 2) - (TILE_SIZE / 2);
+	FRoomBuilder::Init(ROOM_SIZE, TILE_SIZE, DOOR_WIDTH);
 
 	rooms.Empty();								// Clear any rooms stored from the last run
-	URoom* start = NewObject<URoom>();
-	start->Init();
+	URoom* start = FRoomBuilder::BuildRoom();
 	rooms.Add(start);							// Create the first room in the map
 
 	int32 roomCount = FMath::RandRange(MAIN_CHAIN_MIN, MAIN_CHAIN_RAND + MAIN_CHAIN_MIN);		// Calculate how many rooms should be in the main chain of rooms

@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Room.h"
+#include "RoomBuilder.h"
 #include "MapLayout.generated.h"
 
 UCLASS(Blueprintable)

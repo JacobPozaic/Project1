@@ -41,6 +41,9 @@
 MapGen/SourceArt/**/*.png
 MapGen/SourceArt/**/*.tga
 
+#VS Files
+MapGen/.vs/*
+
 # Binary Files
 MapGen/Binaries/*
 
