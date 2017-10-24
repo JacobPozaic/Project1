@@ -2,19 +2,17 @@
 
 URoom::URoom() {}
 
-void URoom::Init(int32 x, int32 y, float ROOM_SIZE, float DOOR_SIZE, URoom* last) {
+void URoom::Init(int32 x, int32 y, float ROOM_SIZE, URoom* last) {
 	this->x = x;
 	this->y = y;
 	this->last = last;
 
 	this->worldX = x * ROOM_SIZE;				// calculate this rooms position in world space
 	this->worldY = y * ROOM_SIZE;				// calculate this rooms position in world space
-
-	this->door_width = DOOR_SIZE / 2;
 }
 
 void URoom::addDoorEntrance(FCoord doorPos) {
-	this->doors.Add(doorPos);				// add the door to the list of doors for this room
+	this->doors.Add(doorPos);					// add the door to the list of doors for this room
 }
 
 bool URoom::posEquals(int32 x, int32 y) {
@@ -31,10 +29,14 @@ void URoom::SetDoorPositions(TArray<FCoord> doors) {
 	this->doors = doors;
 }
 
+TArray<FCoord> URoom::getDoorPosInRoom() {
+	return doors;
+}
+
 TArray<FTransform> URoom::getDoorPositions() {
 	TArray<FTransform> doorPositions;														// stores the FTransform for all doors in this room
 	for (int32 i = 0; i < doors.Num(); i++) {												// for every door
-		FCoord door = doors[i];
+		FCoord door = FUtil::NormalizeLocation(doors[i]);									// move the coordinate from its grid position in the room to its unit position in the room
 		FTransform trans_door = FTransform(FVector(door.x + worldX, door.y + worldY, 0));	// create the FTransform using the world coordinates of the door
 		trans_door.SetRotation(FQuat::MakeFromEuler({ 0.f, 0.f, door.r }));					// rotate the door to match the wall it is against
 		doorPositions.Add(trans_door);														// add the FTransform to the list
@@ -51,14 +53,7 @@ TArray<FTransform> URoom::getWallPositions() {
 	TArray<FTransform> wall_pos;
 	for (int32 i = 0; i < walls.Num(); i++) {
 		FCoord wall = walls[i];
-		bool validPos = true;
-		for (FCoord door : doors) {
-			if (wall.DistanceTo(door) < door_width) {
-				validPos = false;
-				break;
-			}
-		}
-		if (validPos) wall_pos.Add(FTransform(FVector(wall.x + worldX, wall.y + worldY, 0)));
+		wall_pos.Add(FTransform(FVector(wall.x + worldX, wall.y + worldY, 0)));
 	}
 	return wall_pos;
 }

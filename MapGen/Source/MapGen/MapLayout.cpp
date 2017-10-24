@@ -102,6 +102,11 @@ void AMapLayout::BeginPlay() {
 	for (int32 i = 0; i < roomCount - 1; i++)					// For all rooms in the main chain besides the last room (the exit)
 		genExtRooms(rooms[i], EXT_LENGTH);						// Generate rooms that branch off in different directions
 
+	// Finalize rooms // This is because doors are added backwards so room layouts cant be created until all rooms are created and doors placed
+	for (int32 i = 0; i < rooms.Num(); i++) {
+		FRoomBuilder::PopulateRoom(rooms[i]);
+	}
+
 	// Start placing the objects in the world
 	for (int32 i = 0; i < rooms.Num(); i++) {					// For every room that was generated
 		URoom* cur = rooms[i];									// Store a pointer to the current room

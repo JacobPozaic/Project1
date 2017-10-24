@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Coord.h"
+#include "Util.h"
 #include "Room.generated.h"
 
 UCLASS()
@@ -24,7 +25,7 @@ public:
 
 	URoom();
 
-	void Init(int32 x = 0, int32 y = 0, float ROOM_SIZE = 200, float DOOR_SIZE = 1.5f, URoom* last = NULL);
+	void Init(int32 x = 0, int32 y = 0, float ROOM_SIZE = 1000, URoom* last = NULL);
 
 	/**
 	* Add a door between this room and the previous room in the chain (only called from other Room objects)
@@ -40,6 +41,8 @@ public:
 
 	/* Sets the Door positions */
 	void SetDoorPositions(TArray<FCoord> doors);
+
+	TArray<FCoord> getDoorPosInRoom();
 
 	/* Gets the FTansform for every door belonging to this Room */
 	TArray<FTransform> getDoorPositions();

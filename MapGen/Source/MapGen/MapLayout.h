@@ -20,9 +20,9 @@ public:
 		int32 EXT_LENGTH = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int32 ROOM_SIZE = 200;
+		int32 ROOM_SIZE = 1000;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int32 TILE_SIZE = 10;
+		int32 TILE_SIZE = 50;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		float DOOR_WIDTH = 3.0f;
 
