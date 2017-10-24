@@ -9,7 +9,12 @@ private:
 	std::vector<std::vector<ETileType>> grid;	// array to keep track of positions of each tile in a room
 
 public:
+	int32 width;
+	int32 length;
+
 	FGrid(int32 width, int32 length);
+
+	ETileType GetTile(int32 x, int32 y);
 
 	bool SetTile(int32 x, int32 y, ETileType type);
 

@@ -52,13 +52,13 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 	/* Put the door positions on the grid */
 	/* NOTE: door does not take into account door width, assumes its allways 3 tiles wide */
 	for (FCoord door : room->GetDoorPositions()) {
-		room_layout->SetTile(door.x, door.y, DOOR);
-		if (((int32)(door.r / 90.0f) % 2) != 0) {	// place doors on the grid adjacent to the center tile of the doorway, rotated depending on what way the door is oriented
-			room_layout->SetTile(door.x-1, door.y, DOOR);
-			room_layout->SetTile(door.x+1, door.y, DOOR);
+		room_layout->SetTile(door.x, door.y, DOORHOLE);
+		if (((int32)(door.r / 90.0f) % 2) == 0) {	// place doors on the grid adjacent to the center tile of the doorway, rotated depending on what way the door is oriented
+			room_layout->SetTile(door.x, door.y - 1, DOOR);
+			room_layout->SetTile(door.x, door.y + 1, DOOR);
 		} else {
-			room_layout->SetTile(door.x, door.y-1, DOOR);
-			room_layout->SetTile(door.x, door.y+1, DOOR);
+			room_layout->SetTile(door.x - 1, door.y, DOOR);
+			room_layout->SetTile(door.x + 1, door.y, DOOR);
 		}
 	}
 
@@ -80,7 +80,14 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 	//TODO: traps
 
 	/* Find a safe path between each door */
-	// Get door locations
+	TArray<FCoord> doors = room->GetDoorPositions();
+	TArray<Path> paths;
+	for (int i = 0; i < doors.Num() - 1; i++) {
+		for (int j = i + 1; j < doors.Num(); j++) {
+			paths.Add(Path(doors[i], doors[j], *room_layout));
+		}
+	}
+	room->SetPaths(paths);
 
 	/* Randomly add other hazards where they will not block the player from navigating the room */
 

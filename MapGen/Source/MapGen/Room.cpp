@@ -10,12 +10,12 @@ void URoom::Init(int32 x, int32 y, int32 room_width, int32 room_length, int32 ti
 	this->tile_size = tile_size;
 	this->last = last;
 
-	this->world_x = x * room_width * tile_size;				// calculate this rooms position in world space
-	this->world_y = y * room_length * tile_size;			// calculate this rooms position in world space
+	this->world_x = x * room_width * tile_size;		// calculate this rooms position in world space
+	this->world_y = y * room_length * tile_size;	// calculate this rooms position in world space
 }
 
 void URoom::AddDoorEntrance(FCoord doorPos) {
-	this->doors.Add(doorPos);					// add the door to the list of doors for this room
+	this->doors.Add(doorPos);						// add the door to the list of doors for this room
 }
 
 bool URoom::PosEquals(int32 x, int32 y) {
@@ -38,6 +38,10 @@ TArray<FCoord> URoom::GetDoorPositions() {
 
 TArray<FTransform> URoom::GetDoorTransforms() {
 	return GridToWorld(doors);
+}
+
+void URoom::SetPaths(TArray<Path> paths) {
+	this->paths = paths;
 }
 
 void URoom::SetWallPositions(TArray<FCoord> walls) {

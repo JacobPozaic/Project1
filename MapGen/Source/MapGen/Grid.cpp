@@ -1,7 +1,14 @@
 #include "Grid.h"
 
 FGrid::FGrid(int32 width, int32 length) {
+	this->width = width;
+	this->length = length;
+
 	grid.resize(length, std::vector<ETileType>(width, EMPTY));
+}
+
+ETileType FGrid::GetTile(int32 x, int32 y) {
+	return grid[y][x];
 }
 
 bool FGrid::SetTile(int32 x, int32 y, ETileType type) {

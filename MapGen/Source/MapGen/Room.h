@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Coord.h"
+#include "Path.h"
 #include "Room.generated.h"
 
 UCLASS()
@@ -12,6 +13,7 @@ private:
 
 	TArray<FCoord> walls;				// stores the location of each wall in the room
 	TArray<FCoord> doors;				// stores the location of each door in the room
+	TArray<Path> paths;
 
 	TArray<FTransform> GridToWorld(TArray<FCoord> coords);
 
@@ -51,6 +53,9 @@ public:
 
 	/* Gets the FTransform for every door belonging to this Room */
 	TArray<FTransform> GetDoorTransforms();
+
+	/* Sets the safe paths */
+	void SetPaths(TArray<Path> paths);
 
 	/* Sets the Wall positions */
 	void SetWallPositions(TArray<FCoord> walls);

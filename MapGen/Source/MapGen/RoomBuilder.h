@@ -4,6 +4,7 @@
 #include "Room.h"
 #include "Grid.h"
 #include "TileType.h"
+#include "Path.h"
 
 static class MAPGEN_API FRoomBuilder {
 public:
