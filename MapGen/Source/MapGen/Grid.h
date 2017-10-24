@@ -19,4 +19,6 @@ public:
 	bool SetTile(int32 x, int32 y, ETileType type);
 
 	TArray<FCoord> GetAllPosOfType(ETileType type);
+
+	float Coverage(ETileType type);
 };

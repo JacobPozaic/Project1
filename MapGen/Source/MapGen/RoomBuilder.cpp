@@ -74,7 +74,6 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 	}
 
 	/* Template wall positions */
-	//TODO: design some template rooms
 
 	/* Template trap positions */
 	//TODO: traps
@@ -125,6 +124,45 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 	}
 
 	/* Randomly add other hazards where they will not block the player from navigating the room */
+	while (room_layout->Coverage(WALL) < 0.3) {
+		if (FMath::RandRange(0, 99) > 25) {
+			int32 wall_width = FMath::RandRange(1, (int32)(room->width * 0.25f));
+			int32 wall_length = FMath::RandRange(1, (int32)(room->length * 0.25f));
+			FCoord pos;
+			bool invalid = true;
+			while (invalid) {
+				invalid = false;
+				pos = FCoord(FMath::RandRange(1, room->width - wall_width - 1),
+					FMath::RandRange(1, room->length - wall_length - 1));
+
+				for (FCoord door : room->GetDoorPositions()) {
+					switch ((int32)(door.r / 90.0f) % 4) {
+					case 0:	// Left
+						if (door.x + 1 == pos.x && door.y >= pos.y && door.y <= pos.y + wall_length)
+							invalid = true;
+						break;
+					case 1:	// Above
+						if (door.y + 1 == pos.y && door.x >= pos.x && door.x <= pos.x + wall_width)
+							invalid = true;
+						break;
+					case 2:	// Right
+						if (door.x - 1 == pos.x + wall_width && door.y >= pos.y && door.y <= pos.y + wall_length)
+							invalid = true;
+						break;
+					case 3:	// Below
+						if (door.y - 1 == pos.y + wall_length && door.x >= pos.x && door.x <= pos.x + wall_width)
+							invalid = true;
+						break;
+					}
+				}
+			}
+
+			for (int32 i = 0; i < wall_width; i++)
+				for (int32 j = 0; j < wall_length; j++)
+					room_layout->SetTile(pos.x + i, pos.y + j, WALL);
+		}
+		else break;
+	}
 
 	/* Convert grid to FCoords and put them in the URoom */
 	room->SetWallPositions(room_layout->GetAllPosOfType(WALL));

@@ -25,3 +25,12 @@ TArray<FCoord> FGrid::GetAllPosOfType(ETileType type) {
 				pos.Add(FCoord(x, y));
 	return pos;
 }
+
+float FGrid::Coverage(ETileType type) {
+	int32 count = 0;
+	for (int x = 0; x < grid.at(0).size(); x++)
+		for (int y = 0; y < grid.size(); y++)
+			if (grid[y][x] == type)
+				count++;
+	return count / (float)(grid.at(0).size() * grid.size());
+}
