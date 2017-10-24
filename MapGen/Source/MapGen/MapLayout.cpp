@@ -2,7 +2,7 @@
 
 bool AMapLayout::validLoc(int32 x, int32 y) {
 	for (int32 i = 0; i < rooms.Num(); i++)
-		if ((*rooms[i]).posEquals(x, y))
+		if ((*rooms[i]).PosEquals(x, y))
 			return false;
 	return true;
 }
@@ -19,7 +19,7 @@ URoom* AMapLayout::genNextRoom() {
 	}
 	if (!validLoc(x, y))						// check if the location of the new room is not already occupied by another room
 		return genNextRoom();					// if the room wasnt valid then try again (random has a good chance not to try the same direction again) [can RARELY cause a stack overflow]
-	URoom* next = FRoomBuilder::BuildRoom(x, y, dir, last);
+	URoom* next = FRoomBuilder::BuildRoom(x, y, ROOM_SIZE, ROOM_SIZE, TILE_SIZE, DOOR_OFFSET, dir, last);
 	return next;								// return a pointer to the new room
 } 
 
@@ -52,7 +52,7 @@ void AMapLayout::genExtRooms(URoom* current, int32 extend) {
 	while (numRooms-- > 0 && validPos.Num() > 0) {					// while we should still add another room and there is another valid location for an adjacent room
 		int32 index = FMath::RandRange(0, validPos.Num() - 1);		// randomly pick one of the available Rooms
 		FCoord l = validPos[index];
-		URoom* nextRoom = FRoomBuilder::BuildRoom(l.x, l.y, l.r, current);			// get the chosen room from the list of valid rooms
+		URoom* nextRoom = FRoomBuilder::BuildRoom(l.x, l.y, ROOM_SIZE, ROOM_SIZE, TILE_SIZE, DOOR_OFFSET, l.r, current);			// get the chosen room from the list of valid rooms
 		rooms.Add(nextRoom);										// add the new Room's pointer to the list of rooms
 		if (extend > 0) genExtRooms(nextRoom, extend - 1);			// recursively call self so that each extension room on the main chain has a chance to be extended farther
 		validPos.RemoveAt(index, 1, true);							// remove it from the list
@@ -86,8 +86,6 @@ void AMapLayout::BeginPlay() {
 	wall_ISMC->SetStaticMesh(WallMesh);			// Set the mesh to use for the walls in each room
 	wall_ISMC->ClearInstances();				// Clear any instances already on the map
 
-	FRoomBuilder::Init(ROOM_SIZE, TILE_SIZE, DOOR_WIDTH);
-
 	rooms.Empty();								// Clear any rooms stored from the last run
 	URoom* start = FRoomBuilder::BuildRoom();
 	rooms.Add(start);							// Create the first room in the map
@@ -112,15 +110,15 @@ void AMapLayout::BeginPlay() {
 		URoom* cur = rooms[i];									// Store a pointer to the current room
 
 		// Place the floor for the room in the world
-		floor_ISMC->AddInstance(cur->getWorldPosition());		// Create an instance of the floor mesh in the world location
+		floor_ISMC->AddInstance(cur->GetWorldPosition());		// Create an instance of the floor mesh in the world location
 
 		// Place doors in the world
-		TArray<FTransform> doorPos = cur->getDoorPositions();	// Get the location of all the doors in the room
+		TArray<FTransform> doorPos = cur->GetDoorTransforms();	// Get the location of all the doors in the room
 		for (int32 j = 0; j < doorPos.Num(); j++)				// For each door
 			door_ISMC->AddInstance(doorPos[j]);					// Create an instance of it in the world
 
 		// Place walls around each room
-		TArray<FTransform> wallPos = cur->getWallPositions();	// Get the location of all the walls in the room
+		TArray<FTransform> wallPos = cur->GetWallTransforms();	// Get the location of all the walls in the room
 		for (int32 j = 0; j < wallPos.Num(); j++)				// For each wall
 			wall_ISMC->AddInstance(wallPos[j]);					// Create an instance of it in the world
 	}

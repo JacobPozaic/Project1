@@ -10,11 +10,11 @@ bool FGrid::SetTile(int32 x, int32 y, ETileType type) {
 	return true;
 }
 
-TArray<FCoord> FGrid::GetPosInRoomOfType(ETileType type) {
+TArray<FCoord> FGrid::GetAllPosOfType(ETileType type) {
 	TArray<FCoord> pos;
 	for (int x = 0; x < grid.at(0).size(); x++)
 		for (int y = 0; y < grid.size(); y++)
 			if (grid[y][x] == type)
-				pos.Add(FUtil::NormalizeLocation(x, y, 0));
+				pos.Add(FCoord(x, y));
 	return pos;
 }

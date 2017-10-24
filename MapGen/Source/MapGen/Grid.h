@@ -3,7 +3,6 @@
 #include <vector>
 #include "TileType.h"
 #include "Coord.h"
-#include "Util.h"
 
 class MAPGEN_API FGrid {
 private:
@@ -14,5 +13,5 @@ public:
 
 	bool SetTile(int32 x, int32 y, ETileType type);
 
-	TArray<FCoord> GetPosInRoomOfType(ETileType type);
+	TArray<FCoord> GetAllPosOfType(ETileType type);
 };

@@ -20,11 +20,11 @@ public:
 		int32 EXT_LENGTH = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		int32 ROOM_SIZE = 1000;
+		int32 ROOM_SIZE = 20;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		int32 TILE_SIZE = 50;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
-		float DOOR_WIDTH = 3.0f;
+		int32 DOOR_OFFSET = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Generation")
 		UStaticMesh* FloorMesh;
