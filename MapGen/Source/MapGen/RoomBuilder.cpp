@@ -81,16 +81,67 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 
 	/* Find a safe path between each door */
 	TArray<FCoord> doors = room->GetDoorPositions();
-	TArray<Path> paths;
 	for (int i = 0; i < doors.Num() - 1; i++) {
 		for (int j = i + 1; j < doors.Num(); j++) {
-			paths.Add(Path(doors[i], doors[j], *room_layout));
+			int randomize_path = FMath::RandRange(0, (int32)(doors[i].DistanceTo(doors[j]) / 6));
+			if (randomize_path > 0) {
+				int min_x;
+				int min_y;
+				int max_x;
+				int max_y;
+				if (doors[i].x < doors[j].x) {
+					min_x = doors[i].x + 1;
+					max_x = doors[j].x - 1;
+				} else {
+					min_x = doors[j].x + 1;
+					max_x = doors[i].x - 1;
+				}
+				if (doors[i].y < doors[j].y) {
+					min_y = doors[i].y + 1;
+					max_y = doors[j].y - 1;
+				} else {
+					min_y = doors[j].y + 1;
+					max_y = doors[i].y - 1;
+				}
+				TArray<FCoord> points;
+				for (int k = 0; k < randomize_path; k++) {
+					FCoord pos = FCoord(FMath::RandRange(min_x, max_x), FMath::RandRange(min_y, max_y));
+					if (room_layout->GetTile(pos.x, pos.y) == EMPTY || room_layout->GetTile(pos.x, pos.y) == PATH) {
+						points.Add(pos);
+					}
+				}
+				if (points.Num() != 0) {
+					FCoord next = GetClosestPoint(doors[i], &points);
+					Path::FindPath(doors[i], next, room_layout);
+					while (points.Num() > 0) {
+						FCoord last = next;
+						next = GetClosestPoint(last, &points);
+						Path::FindPath(last, next, room_layout);
+					}
+					Path::FindPath(next, doors[j], room_layout);
+				} else Path::FindPath(doors[i], doors[j], room_layout);
+			} else Path::FindPath(doors[i], doors[j], room_layout);
 		}
 	}
-	room->SetPaths(paths);
 
 	/* Randomly add other hazards where they will not block the player from navigating the room */
 
 	/* Convert grid to FCoords and put them in the URoom */
 	room->SetWallPositions(room_layout->GetAllPosOfType(WALL));
+}
+
+FCoord FRoomBuilder::GetClosestPoint(FCoord start, TArray<FCoord>* points) {
+	FCoord closest = (*points)[0];
+	int32 dist_close = start.DistanceTo(closest);
+	int32 index = 0;
+	for (int k = 1; k < (*points).Num(); k++) {
+		int dist_point = start.DistanceTo((*points)[k]);
+		if (dist_point < dist_close) {
+			closest = (*points)[k];
+			dist_close = dist_point;
+			index = k;
+		}
+	}
+	points->RemoveAt(index);
+	return closest;
 }

@@ -40,10 +40,6 @@ TArray<FTransform> URoom::GetDoorTransforms() {
 	return GridToWorld(doors);
 }
 
-void URoom::SetPaths(TArray<Path> paths) {
-	this->paths = paths;
-}
-
 void URoom::SetWallPositions(TArray<FCoord> walls) {
 	this->walls = walls;
 }
