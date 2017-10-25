@@ -1,9 +1,9 @@
 #include "Path.h"
 
-void Path::FindPath(FCoord start, FCoord target, FGrid* room) {
+void Path::FindPath(Pos start, Pos target, FGrid* room) {
 	TArray<Pos> path;
-	path.Add(Pos(start));
-	for (Pos p : FindPath(Pos(target), path, *room))
+	path.Add(start);
+	for (Pos p : FindPath(target, path, *room))
 		room->SetTile(p.x, p.y, PATH);
 }
 

@@ -1,6 +1,6 @@
 #include "Pos.h"
 
-Pos::Pos(int32 x, int32 y) {
+Pos::Pos(float x, float y) {
 	this->x = x;
 	this->y = y;
 }
@@ -14,7 +14,7 @@ bool Pos::operator==(const Pos p) {
 	return this->x == p.x && this->y == p.y;
 }
 
-int32 Pos::DistanceTo(Pos target) {
+float Pos::DistanceTo(Pos target) {
 	int x = target.x - this->x;
 	int y = target.y - this->y;
 	return sqrt(pow(x, 2) + pow(y, 2));

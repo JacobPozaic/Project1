@@ -1,7 +1,9 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Pos.h"
 #include "Coord.h"
+#include "MapGenParameters.h"
 #include "Room.generated.h"
 
 UCLASS()
@@ -18,20 +20,17 @@ private:
 	TArray<FTransform> GridToWorld(TArray<FCoord> coords);
 
 public:
-	int32 x;							// coordinate location of this room in relation to other rooms
-	int32 y;							// coordinate location of this room in relation to other rooms
+	Pos pos;
+	Pos world;
 
 	int32 width;						// the number of tiles wide the room is (x axis)
 	int32 length;						// the number of tiles long the room is (y axis)
-
-	int32 world_x;						// coodinate location of this room in world units
-	int32 world_y;						// coodinate location of this room in world units
 
 	int32 tile_size;
 
 	URoom();
 
-	void Init(int32 x = 0, int32 y = 0, int32 room_width = 20, int32 room_length = 20, int32 tile_size = 50, URoom* last = NULL, bool is_exit = false);
+	void Init(FMapGenParameters* map_layout, float x = 0, float y = 0, URoom* last = NULL, bool is_exit = false);
 
 	/**
 	* Add a door between this room and the previous room in the chain (only called from other Room objects)

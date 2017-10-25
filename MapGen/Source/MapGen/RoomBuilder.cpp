@@ -1,60 +1,58 @@
 #include "RoomBuilder.h"
 
-static const float TEMPLATE_SIZE_RATIO = 0.5f;
-static const float PATH_POINT_DIST = 6.0f;
-
-static const float ROOM_COVERAGE_MAX = 0.3f;
-static const float RAND_WALL_CHANCE = 0.25f;
-static const float RAND_WALL_WIDTH_SIZE_RATIO = 0.25f;
-static const float RAND_WALL_LENGTH_SIZE_RATIO = 0.25f;
-
-URoom* FRoomBuilder::BuildRoom(int32 room_x, int32 room_y, int32 room_width, int32 room_length, int32 tile_size, int32 door_offset, int32 dir, URoom* last, bool is_exit) {
+URoom* FRoomBuilder::BuildRoom(FMapGenParameters* map_layout, FCoord pos, URoom* last, bool is_exit) {
 	/* Create the door to the previous room in the chain and add a door to that room that goes to this room */
 	TArray<FCoord> door_pos;
-	if (dir != -1) {
-		FCoord door;						// stores the location of the door to the previous room
-		FCoord door2;
-		door.r = dir * 90.0f;				// the rotation on the door
-		door2.r = door.r + 180.0f;
-		switch (dir) {															// determine what wall the door is on
-		case 0:																	// if the door is on the left wall
-			door.x = 0;															// set its x position to be on the left wall
-			door.y = FMath::RandRange(door_offset, room_width - door_offset);	// set its y position to be a random spot along the left wall
-			door2.x = room_length - 1;
-			door2.y = door.y;
+	if (pos.r != -1) {
+		FCoord door_current;
+		FCoord door_previous;
+		/* Convert the door rotation from cardinal to Euler and flip door2's rotation*/
+		door_current.r = pos.r * 90.0f;
+		door_previous.r = door_current.r + 180.0f;
+		switch ((int32)pos.r) {
+		case 0:
+			/* Door is on the left wall */
+			door_current.x = 0;
+			door_current.y = FMath::RandRange(map_layout->DOOR_OFFSET, map_layout->ROOM_WIDTH - map_layout->DOOR_OFFSET);
+			door_previous.x = map_layout->ROOM_LENGTH - 1;
+			door_previous.y = door_current.y;
 			break;
-		case 1:																	// if the door is on the above wall	
-			door.y = 0;															// set its y position to be on the above wall
-			door.x = FMath::RandRange(door_offset, room_length - door_offset);	// set its x position to be a random spot along the above wall
-			door2.y = room_width - 1;
-			door2.x = door.x;
+		case 1:
+			/* Door is on the top wall */
+			door_current.y = 0;
+			door_current.x = FMath::RandRange(map_layout->DOOR_OFFSET, map_layout->ROOM_LENGTH - map_layout->DOOR_OFFSET);
+			door_previous.y = map_layout->ROOM_WIDTH - 1;
+			door_previous.x = door_current.x;
 			break;
-		case 2:																	// if the door is on the right wall
-			door.x = room_length - 1;											// set its x position to be on the right wall
-			door.y = FMath::RandRange(door_offset, room_width - door_offset);	// set its y position to be a random spot along the right wall
-			door2.x = 0;
-			door2.y = door.y;
+		case 2:
+			/* Door is on the right wall */
+			door_current.x = map_layout->ROOM_LENGTH - 1;
+			door_current.y = FMath::RandRange(map_layout->DOOR_OFFSET, map_layout->ROOM_WIDTH - map_layout->DOOR_OFFSET);
+			door_previous.x = 0;
+			door_previous.y = door_current.y;
 			break;
-		case 3:																	// if the door is on the bottom wall
-			door.y = room_width - 1;											// set its y position to be on the bottom wall
-			door.x = FMath::RandRange(door_offset, room_length - door_offset);	// set its x position to be a random spot along the bottom wall
-			door2.y = 0;
-			door2.x = door.x;
+		case 3:
+			/* Door is on the bottom wall */
+			door_current.y = map_layout->ROOM_WIDTH - 1;
+			door_current.x = FMath::RandRange(map_layout->DOOR_OFFSET, map_layout->ROOM_LENGTH - map_layout->DOOR_OFFSET);
+			door_previous.y = 0;
+			door_previous.x = door_current.x;
 			break;
 		}
-		door_pos.Add(door);					// add the door to the list of doors for this room
-		last->AddDoorEntrance(door2);		// add a door on the previous room that connects to the new door on this room
+		/* Add the doorway between this room and the last */
+		door_pos.Add(door_current);
+		last->AddDoorEntrance(door_previous);
 	}
 
 	/* Create the Room */
 	URoom* room = NewObject<URoom>();
-	room->Init(room_x, room_y, room_width, room_length, tile_size, last, is_exit);
+	room->Init(map_layout, pos.x, pos.y, last, is_exit);
 	room->SetDoorPositions(door_pos);
-
 	return room;
 }
 
-void FRoomBuilder::PopulateRoom(URoom* room) {
+//TODO: comment and format
+void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 	int32 width = room->width;
 	int32 length = room->length;
 	TArray<FCoord> doors = room->GetDoorPositions();
@@ -95,7 +93,7 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 		int32 half_length = length / 2;
 		if (random_chance < 100) {
 			/* Cylinder in center of room */
-			int32 radius = FMath::RandRange(2, ((width < length) ? half_width : half_length)) * TEMPLATE_SIZE_RATIO;
+			int32 radius = FMath::RandRange(2, ((width < length) ? half_width : half_length)) * map_layout->TEMPLATE_SIZE_RATIO;
 			if (radius % 2 == 1) radius++;
 			TArray<FCoord> cylinder;
 			for (int x = 0; x <= radius; x++) {
@@ -112,8 +110,8 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 		}
 		else if (random_chance < 200) {
 			/* Square in room */
-			int32 sq_width = FMath::RandRange(1, (int32)(half_width * TEMPLATE_SIZE_RATIO));
-			int32 sq_length = FMath::RandRange(1, (int32)(half_length * TEMPLATE_SIZE_RATIO));
+			int32 sq_width = FMath::RandRange(1, (int32)(half_width * map_layout->TEMPLATE_SIZE_RATIO));
+			int32 sq_length = FMath::RandRange(1, (int32)(half_length * map_layout->TEMPLATE_SIZE_RATIO));
 			TArray<FCoord> square;
 			for (int x = 0; x < sq_width; x++)
 				for (int y = 0; y < sq_length; y++)
@@ -130,7 +128,7 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 		/* Find a safe path between each door */
 		for (int i = 0; i < doors.Num() - 1; i++) {
 			for (int j = i + 1; j < doors.Num(); j++) {
-				int randomize_path = FMath::RandRange(0, (int32)(doors[i].DistanceTo(doors[j]) / PATH_POINT_DIST));
+				int randomize_path = FMath::RandRange(0, (int32)(doors[i].DistanceTo(doors[j]) / map_layout->PATH_POINT_DIST));
 				if (randomize_path > 0) {
 					int min_x;
 					int min_y;
@@ -150,17 +148,17 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 						min_y = doors[j].y + 1;
 						max_y = doors[i].y - 1;
 					}
-					TArray<FCoord> points;
+					TArray<Pos> points;
 					for (int k = 0; k < randomize_path; k++) {
-						FCoord pos = FCoord(FMath::RandRange(min_x, max_x), FMath::RandRange(min_y, max_y));
+						Pos pos = Pos(FMath::RandRange(min_x, max_x), FMath::RandRange(min_y, max_y));
 						if (room_layout->GetTile(pos.x, pos.y) == EMPTY || room_layout->GetTile(pos.x, pos.y) == PATH)
 							points.Add(pos);
 					}
 					if (points.Num() != 0) {
-						FCoord next = GetClosestPoint(doors[i], &points);
+						Pos next = GetClosestPoint(doors[i], &points);
 						Path::FindPath(doors[i], next, room_layout);
 						while (points.Num() > 0) {
-							FCoord last = next;
+							Pos last = next;
 							next = GetClosestPoint(last, &points);
 							Path::FindPath(last, next, room_layout);
 						}
@@ -174,10 +172,10 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 
 		/* Randomly add other hazards where they will not block the player from navigating the room */
 		/* It might be better to not have randomly generated walls */
-		while (room_layout->Coverage(WALL) < ROOM_COVERAGE_MAX) {
-			if (FMath::RandRange(0.0f, 1.0f) > RAND_WALL_CHANCE) {
-				int32 wall_width = FMath::RandRange(1, (int32)(width * RAND_WALL_WIDTH_SIZE_RATIO));
-				int32 wall_length = FMath::RandRange(1, (int32)(length * RAND_WALL_LENGTH_SIZE_RATIO));
+		while (room_layout->Coverage(WALL) <  map_layout->ROOM_COVERAGE_MAX) {
+			if (FMath::RandRange(0.0f, 1.0f) >  map_layout->RAND_WALL_CHANCE) {
+				int32 wall_width = FMath::RandRange(1, (int32)(width *  map_layout->RAND_WALL_WIDTH_SIZE_RATIO));
+				int32 wall_length = FMath::RandRange(1, (int32)(length *  map_layout->RAND_WALL_LENGTH_SIZE_RATIO));
 				FCoord pos;
 				bool invalid = true;
 				while (invalid) {
@@ -219,8 +217,8 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 	room->SetWallPositions(room_layout->GetAllPosOfType(WALL));
 }
 
-FCoord FRoomBuilder::GetClosestPoint(FCoord start, TArray<FCoord>* points) {
-	FCoord closest = (*points)[0];
+Pos FRoomBuilder::GetClosestPoint(Pos start, TArray<Pos>* points) {
+	Pos closest = (*points)[0];
 	int32 dist_close = start.DistanceTo(closest);
 	int32 index = 0;
 	for (int k = 1; k < (*points).Num(); k++) {

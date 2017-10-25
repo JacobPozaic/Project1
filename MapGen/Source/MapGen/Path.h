@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Pos.h"
-#include "Coord.h"
 #include "Grid.h"
 
 static class MAPGEN_API Path {
@@ -22,5 +21,5 @@ private:
 	static bool ValidPosition(const int32 x, const int32 y, const TArray<Pos> path, const FGrid room);
 
 public:
-	static void FindPath(const FCoord start, const FCoord target, FGrid* room);
+	static void FindPath(const Pos start, const Pos target, FGrid* room);
 };
