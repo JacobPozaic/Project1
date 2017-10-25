@@ -7,7 +7,7 @@ bool AMapLayout::validLoc(int32 x, int32 y) {
 	return true;
 }
 
-URoom* AMapLayout::genNextRoom() {
+URoom* AMapLayout::genNextRoom(bool is_exit) {
 	URoom* last = rooms.Last();					// get a pointer to the most recently created room in the chain
 	int32 dir = FMath::RandRange(0, 2);			// choose a random direction to place the next room in, (dont go DOWN because its easy to get locked in and no extra rooms can be added)
 	int32 x = last->x;							// get the x position of the last room
@@ -18,8 +18,8 @@ URoom* AMapLayout::genNextRoom() {
 	case 2:	x = last->x - 1; break;				// if the new room is to the right, x = last.x - 1
 	}
 	if (!validLoc(x, y))						// check if the location of the new room is not already occupied by another room
-		return genNextRoom();					// if the room wasnt valid then try again (random has a good chance not to try the same direction again) [can RARELY cause a stack overflow]
-	URoom* next = FRoomBuilder::BuildRoom(x, y, ROOM_SIZE, ROOM_SIZE, TILE_SIZE, DOOR_OFFSET, dir, last);
+		return genNextRoom(is_exit);			// if the room wasnt valid then try again (random has a good chance not to try the same direction again) [can RARELY cause a stack overflow]
+	URoom* next = FRoomBuilder::BuildRoom(x, y, ROOM_SIZE, ROOM_SIZE, TILE_SIZE, DOOR_OFFSET, dir, last, is_exit);
 	return next;								// return a pointer to the new room
 } 
 
@@ -93,8 +93,8 @@ void AMapLayout::BeginPlay() {
 	int32 roomCount = FMath::RandRange(MAIN_CHAIN_MIN, MAIN_CHAIN_RAND + MAIN_CHAIN_MIN);		// Calculate how many rooms should be in the main chain of rooms
 
 	// Generate the main chain of rooms
-	for (int32 i = 0; i < roomCount; i++)						// For each room that should be created
-		rooms.Add(genNextRoom());								// Generate a new room in a valid location adjacent to the previous room
+	for (int32 i = 1; i <= roomCount; i++)							// For each room that should be created
+		rooms.Add(genNextRoom((i == roomCount) ? true : false));	// Generate a new room in a valid location adjacent to the previous room
 
 	// Generate extension rooms branching off the main chain of rooms
 	for (int32 i = 0; i < roomCount - 1; i++)					// For all rooms in the main chain besides the last room (the exit)

@@ -10,6 +10,8 @@ class MAPGEN_API URoom : public UObject {
 private:
 	URoom* last;						// stores a pointer to the previous room in the chain
 
+	bool exit;
+
 	TArray<FCoord> walls;				// stores the location of each wall in the room
 	TArray<FCoord> doors;				// stores the location of each door in the room
 
@@ -29,7 +31,7 @@ public:
 
 	URoom();
 
-	void Init(int32 x = 0, int32 y = 0, int32 room_width = 20, int32 room_length = 20, int32 tile_size = 50, URoom* last = NULL);
+	void Init(int32 x = 0, int32 y = 0, int32 room_width = 20, int32 room_length = 20, int32 tile_size = 50, URoom* last = NULL, bool is_exit = false);
 
 	/**
 	* Add a door between this room and the previous room in the chain (only called from other Room objects)
@@ -60,4 +62,10 @@ public:
 
 	/* Gets the FTransform for every wall belonging to this Room */
 	TArray<FTransform> GetWallTransforms();
+
+	/* Gets if this is the start room */
+	bool IsStart();
+
+	/* Gets if this is the start room */
+	bool IsExit();
 };

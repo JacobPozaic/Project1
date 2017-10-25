@@ -1,6 +1,14 @@
 #include "RoomBuilder.h"
 
-URoom* FRoomBuilder::BuildRoom(int32 room_x, int32 room_y, int32 room_width, int32 room_length, int32 tile_size, int32 door_offset, int32 dir, URoom* last) {
+static const float TEMPLATE_SIZE_RATIO = 0.5f;
+static const float PATH_POINT_DIST = 6.0f;
+
+static const float ROOM_COVERAGE_MAX = 0.3f;
+static const float RAND_WALL_CHANCE = 0.25f;
+static const float RAND_WALL_WIDTH_SIZE_RATIO = 0.25f;
+static const float RAND_WALL_LENGTH_SIZE_RATIO = 0.25f;
+
+URoom* FRoomBuilder::BuildRoom(int32 room_x, int32 room_y, int32 room_width, int32 room_length, int32 tile_size, int32 door_offset, int32 dir, URoom* last, bool is_exit) {
 	/* Create the door to the previous room in the chain and add a door to that room that goes to this room */
 	TArray<FCoord> door_pos;
 	if (dir != -1) {
@@ -40,18 +48,21 @@ URoom* FRoomBuilder::BuildRoom(int32 room_x, int32 room_y, int32 room_width, int
 
 	/* Create the Room */
 	URoom* room = NewObject<URoom>();
-	room->Init(room_x, room_y, room_width, room_length, tile_size, last);
+	room->Init(room_x, room_y, room_width, room_length, tile_size, last, is_exit);
 	room->SetDoorPositions(door_pos);
 
 	return room;
 }
 
 void FRoomBuilder::PopulateRoom(URoom* room) {
-	FGrid* room_layout = new FGrid(room->width, room->length);
+	int32 width = room->width;
+	int32 length = room->length;
+	TArray<FCoord> doors = room->GetDoorPositions();
+	FGrid* room_layout = new FGrid(width, length);
 
 	/* Put the door positions on the grid */
 	/* NOTE: door does not take into account door width, assumes its allways 3 tiles wide */
-	for (FCoord door : room->GetDoorPositions()) {
+	for (FCoord door : doors) {
 		room_layout->SetTile(door.x, door.y, DOORHOLE);
 		if (((int32)(door.r / 90.0f) % 2) == 0) {	// place doors on the grid adjacent to the center tile of the doorway, rotated depending on what way the door is oriented
 			room_layout->SetTile(door.x, door.y - 1, DOOR);
@@ -64,106 +75,146 @@ void FRoomBuilder::PopulateRoom(URoom* room) {
 
 	/* Place walls */
 	/* Calculate outer wall positions */
-	for (int32 i = 0; i < room->width; i++) {
+	for (int32 i = 0; i < width; i++) {
 		room_layout->SetTile(i, 0, WALL);					// place wall peice on the top wall
-		room_layout->SetTile(i, room->length - 1, WALL);	// place wall peice on the bottom wall
+		room_layout->SetTile(i, length - 1, WALL);	// place wall peice on the bottom wall
 	}
-	for (int32 i = 1; i < room->length - 1; i++) {
+	for (int32 i = 1; i < length - 1; i++) {
 		room_layout->SetTile(0, i, WALL);					// place wall peice on the left wall
-		room_layout->SetTile(room->width - 1, i, WALL);		// place wall peice on the right wall
+		room_layout->SetTile(width - 1, i, WALL);		// place wall peice on the right wall
 	}
 
-	/* Template wall positions */
-
-	/* Template trap positions */
-	//TODO: traps
-
-	/* Find a safe path between each door */
-	TArray<FCoord> doors = room->GetDoorPositions();
-	for (int i = 0; i < doors.Num() - 1; i++) {
-		for (int j = i + 1; j < doors.Num(); j++) {
-			int randomize_path = FMath::RandRange(0, (int32)(doors[i].DistanceTo(doors[j]) / 6));
-			if (randomize_path > 0) {
-				int min_x;
-				int min_y;
-				int max_x;
-				int max_y;
-				if (doors[i].x < doors[j].x) {
-					min_x = doors[i].x + 1;
-					max_x = doors[j].x - 1;
-				} else {
-					min_x = doors[j].x + 1;
-					max_x = doors[i].x - 1;
-				}
-				if (doors[i].y < doors[j].y) {
-					min_y = doors[i].y + 1;
-					max_y = doors[j].y - 1;
-				} else {
-					min_y = doors[j].y + 1;
-					max_y = doors[i].y - 1;
-				}
-				TArray<FCoord> points;
-				for (int k = 0; k < randomize_path; k++) {
-					FCoord pos = FCoord(FMath::RandRange(min_x, max_x), FMath::RandRange(min_y, max_y));
-					if (room_layout->GetTile(pos.x, pos.y) == EMPTY || room_layout->GetTile(pos.x, pos.y) == PATH) {
-						points.Add(pos);
-					}
-				}
-				if (points.Num() != 0) {
-					FCoord next = GetClosestPoint(doors[i], &points);
-					Path::FindPath(doors[i], next, room_layout);
-					while (points.Num() > 0) {
-						FCoord last = next;
-						next = GetClosestPoint(last, &points);
-						Path::FindPath(last, next, room_layout);
-					}
-					Path::FindPath(next, doors[j], room_layout);
-				} else Path::FindPath(doors[i], doors[j], room_layout);
-			} else Path::FindPath(doors[i], doors[j], room_layout);
-		}
-	}
-
-	/* Randomly add other hazards where they will not block the player from navigating the room */
-	while (room_layout->Coverage(WALL) < 0.3) {
-		if (FMath::RandRange(0, 99) > 25) {
-			int32 wall_width = FMath::RandRange(1, (int32)(room->width * 0.25f));
-			int32 wall_length = FMath::RandRange(1, (int32)(room->length * 0.25f));
-			FCoord pos;
-			bool invalid = true;
-			while (invalid) {
-				invalid = false;
-				pos = FCoord(FMath::RandRange(1, room->width - wall_width - 1),
-					FMath::RandRange(1, room->length - wall_length - 1));
-
-				for (FCoord door : room->GetDoorPositions()) {
-					switch ((int32)(door.r / 90.0f) % 4) {
-					case 0:	// Left
-						if (door.x + 1 == pos.x && door.y >= pos.y && door.y <= pos.y + wall_length)
-							invalid = true;
-						break;
-					case 1:	// Above
-						if (door.y + 1 == pos.y && door.x >= pos.x && door.x <= pos.x + wall_width)
-							invalid = true;
-						break;
-					case 2:	// Right
-						if (door.x - 1 == pos.x + wall_width && door.y >= pos.y && door.y <= pos.y + wall_length)
-							invalid = true;
-						break;
-					case 3:	// Below
-						if (door.y - 1 == pos.y + wall_length && door.x >= pos.x && door.x <= pos.x + wall_width)
-							invalid = true;
-						break;
+	if (room->IsStart()) {
+		//TODO: place start
+	} else if(room->IsExit()) {
+		//TODO: place exit
+	} else {
+		/* Template wall positions */
+		int32 random_chance = FMath::RandRange(0, 1000);
+		int32 half_width = width / 2;
+		int32 half_length = length / 2;
+		if (random_chance < 100) {
+			/* Cylinder in center of room */
+			int32 radius = FMath::RandRange(2, ((width < length) ? half_width : half_length)) * TEMPLATE_SIZE_RATIO;
+			if (radius % 2 == 1) radius++;
+			TArray<FCoord> cylinder;
+			for (int x = 0; x <= radius; x++) {
+				for (int y = 0; y <= radius; y++) {
+					if (x * x + y * y <= radius * radius) {
+						cylinder.Add(FCoord(half_width + x, half_length + y));
+						cylinder.Add(FCoord(half_width - x - 1, half_length + y));
+						cylinder.Add(FCoord(half_width + x, half_length - y - 1));
+						cylinder.Add(FCoord(half_width - x - 1, half_length - y - 1));
 					}
 				}
 			}
-
-			for (int32 i = 0; i < wall_width; i++)
-				for (int32 j = 0; j < wall_length; j++)
-					room_layout->SetTile(pos.x + i, pos.y + j, WALL);
+			room_layout->SetTiles(cylinder, WALL);
 		}
-		else break;
-	}
+		else if (random_chance < 200) {
+			/* Square in room */
+			int32 sq_width = FMath::RandRange(1, (int32)(half_width * TEMPLATE_SIZE_RATIO));
+			int32 sq_length = FMath::RandRange(1, (int32)(half_length * TEMPLATE_SIZE_RATIO));
+			TArray<FCoord> square;
+			for (int x = 0; x < sq_width; x++)
+				for (int y = 0; y < sq_length; y++)
+					square.Add(FCoord(x + half_width, y + half_length));
+			room_layout->SetTiles(square, WALL);
+		}
+		else {
 
+		}
+
+		/* Template trap positions */
+		//TODO: traps
+
+		/* Find a safe path between each door */
+		for (int i = 0; i < doors.Num() - 1; i++) {
+			for (int j = i + 1; j < doors.Num(); j++) {
+				int randomize_path = FMath::RandRange(0, (int32)(doors[i].DistanceTo(doors[j]) / PATH_POINT_DIST));
+				if (randomize_path > 0) {
+					int min_x;
+					int min_y;
+					int max_x;
+					int max_y;
+					if (doors[i].x < doors[j].x) {
+						min_x = doors[i].x + 1;
+						max_x = doors[j].x - 1;
+					} else {
+						min_x = doors[j].x + 1;
+						max_x = doors[i].x - 1;
+					}
+					if (doors[i].y < doors[j].y) {
+						min_y = doors[i].y + 1;
+						max_y = doors[j].y - 1;
+					} else {
+						min_y = doors[j].y + 1;
+						max_y = doors[i].y - 1;
+					}
+					TArray<FCoord> points;
+					for (int k = 0; k < randomize_path; k++) {
+						FCoord pos = FCoord(FMath::RandRange(min_x, max_x), FMath::RandRange(min_y, max_y));
+						if (room_layout->GetTile(pos.x, pos.y) == EMPTY || room_layout->GetTile(pos.x, pos.y) == PATH)
+							points.Add(pos);
+					}
+					if (points.Num() != 0) {
+						FCoord next = GetClosestPoint(doors[i], &points);
+						Path::FindPath(doors[i], next, room_layout);
+						while (points.Num() > 0) {
+							FCoord last = next;
+							next = GetClosestPoint(last, &points);
+							Path::FindPath(last, next, room_layout);
+						}
+						Path::FindPath(next, doors[j], room_layout);
+					}
+					else Path::FindPath(doors[i], doors[j], room_layout);
+				}
+				else Path::FindPath(doors[i], doors[j], room_layout);
+			}
+		}
+
+		/* Randomly add other hazards where they will not block the player from navigating the room */
+		/* It might be better to not have randomly generated walls */
+		while (room_layout->Coverage(WALL) < ROOM_COVERAGE_MAX) {
+			if (FMath::RandRange(0.0f, 1.0f) > RAND_WALL_CHANCE) {
+				int32 wall_width = FMath::RandRange(1, (int32)(width * RAND_WALL_WIDTH_SIZE_RATIO));
+				int32 wall_length = FMath::RandRange(1, (int32)(length * RAND_WALL_LENGTH_SIZE_RATIO));
+				FCoord pos;
+				bool invalid = true;
+				while (invalid) {
+					invalid = false;
+					pos = FCoord(FMath::RandRange(1, width - wall_width - 1),
+						FMath::RandRange(1, length - wall_length - 1));
+
+					for (FCoord door : doors) {
+						switch ((int32)(door.r / 90.0f) % 4) {
+						case 0:	// Left
+							if (door.x + 1 == pos.x && door.y >= pos.y && door.y <= pos.y + wall_length)
+								invalid = true;
+							break;
+						case 1:	// Above
+							if (door.y + 1 == pos.y && door.x >= pos.x && door.x <= pos.x + wall_width)
+								invalid = true;
+							break;
+						case 2:	// Right
+							if (door.x - 1 == pos.x + wall_width && door.y >= pos.y && door.y <= pos.y + wall_length)
+								invalid = true;
+							break;
+						case 3:	// Below
+							if (door.y - 1 == pos.y + wall_length && door.x >= pos.x && door.x <= pos.x + wall_width)
+								invalid = true;
+							break;
+						}
+					}
+				}
+
+				for (int32 i = 0; i < wall_width; i++)
+					for (int32 j = 0; j < wall_length; j++)
+						room_layout->SetTile(pos.x + i, pos.y + j, WALL);
+			}
+			else break;
+		}
+	}
+	
 	/* Convert grid to FCoords and put them in the URoom */
 	room->SetWallPositions(room_layout->GetAllPosOfType(WALL));
 }

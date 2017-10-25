@@ -16,6 +16,7 @@ public:
 
 	ETileType GetTile(int32 x, int32 y);
 
+	void SetTiles(TArray<FCoord> tiles, ETileType type);
 	bool SetTile(int32 x, int32 y, ETileType type);
 
 	TArray<FCoord> GetAllPosOfType(ETileType type);

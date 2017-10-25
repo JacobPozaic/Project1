@@ -11,7 +11,7 @@ private:
 	static FCoord FRoomBuilder::GetClosestPoint(FCoord start, TArray<FCoord>* points);
 
 public:
-	static URoom* BuildRoom(int32 room_x = 0, int32 room_y = 0, int32 room_width = 20, int32 room_length = 20, int32 tile_size = 50, int32 door_offset = 2, int32 dir = -1, URoom* last = NULL);
+	static URoom* BuildRoom(int32 room_x = 0, int32 room_y = 0, int32 room_width = 20, int32 room_length = 20, int32 tile_size = 50, int32 door_offset = 2, int32 dir = -1, URoom* last = NULL, bool is_exit = false);
 
 	static void PopulateRoom(URoom* room);
 };

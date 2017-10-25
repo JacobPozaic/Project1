@@ -2,13 +2,14 @@
 
 URoom::URoom() {}
 
-void URoom::Init(int32 x, int32 y, int32 room_width, int32 room_length, int32 tile_size, URoom* last) {
+void URoom::Init(int32 x, int32 y, int32 room_width, int32 room_length, int32 tile_size, URoom* last, bool is_exit) {
 	this->x = x;
 	this->y = y;
 	this->width = room_width;
 	this->length = room_length;
 	this->tile_size = tile_size;
 	this->last = last;
+	this->exit = is_exit;
 
 	this->world_x = x * room_width * tile_size;		// calculate this rooms position in world space
 	this->world_y = y * room_length * tile_size;	// calculate this rooms position in world space
@@ -69,4 +70,12 @@ TArray<FTransform> URoom::GridToWorld(TArray<FCoord> coords) {
 		transforms.Add(world_trans);											// add the FTransform to the list
 	}
 	return transforms;															// return the list of FTransforms for all the doors
+}
+
+bool URoom::IsStart() {
+	return last == NULL;
+}
+
+bool URoom::IsExit() {
+	return exit;
 }

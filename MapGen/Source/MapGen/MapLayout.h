@@ -52,7 +52,7 @@ private:
 	/**
 	* Generates a new room in the main chain of rooms
 	*/
-	URoom* genNextRoom();
+	URoom* genNextRoom(bool is_exit);
 
 	/**
 	* Generates any rooms that extend off of the main chain.

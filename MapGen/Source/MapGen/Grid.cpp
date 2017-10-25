@@ -11,6 +11,11 @@ ETileType FGrid::GetTile(int32 x, int32 y) {
 	return grid[y][x];
 }
 
+void FGrid::SetTiles(TArray<FCoord> tiles, ETileType type) {
+	for (FCoord tile : tiles)
+		SetTile(tile.x, tile.y, type);
+}
+
 bool FGrid::SetTile(int32 x, int32 y, ETileType type) {
 	if (grid[y][x] != EMPTY) return false;
 	grid[y][x] = type;
