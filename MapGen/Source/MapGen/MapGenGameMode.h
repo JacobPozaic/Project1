@@ -5,7 +5,6 @@
 #include "GameFramework/GameModeBase.h"
 
 #include "PlayerCharacter.h"
-#include "PlayerControl.h"
 #include "MapLayout.h"
 
 #include "MapGenGameMode.generated.h"
