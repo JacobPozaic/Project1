@@ -85,8 +85,13 @@ AMapLayout::AMapLayout() {
 	param->RAND_WALL_LENGTH_SIZE_RATIO = RAND_WALL_LENGTH_SIZE_RATIO;
 }
 
-void AMapLayout::BeginPlay() {
-	Super::BeginPlay();
+void AMapLayout::Init(UStaticMesh* floor_mesh, UStaticMesh* door_mesh, UStaticMesh* wall_mesh) {
+	this->floor_mesh = floor_mesh;
+	this->door_mesh = door_mesh;
+	this->wall_mesh = wall_mesh;
+}
+
+void AMapLayout::GenerateMap() {
 	this->RegisterAllComponents();
 
 	/* Set the mesh for each ISMC */

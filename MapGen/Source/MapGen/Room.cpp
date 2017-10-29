@@ -52,9 +52,9 @@ TArray<FTransform> URoom::GetWallTransforms() {
 }
 
 TArray<FTransform> URoom::GridToWorld(TArray<FCoord> coords) {
-	TArray<FTransform> transforms;												// stores the FTransform for all doors in this room
-	for (FCoord coord : coords) {												// for every door
-		FCoord world_offset = coord.Clone();											// move the coordinate from its grid position in the room to its unit position in the room
+	TArray<FTransform> transforms;															// stores the FTransform for all doors in this room
+	for (FCoord coord : coords) {															// for every door
+		FCoord world_offset = coord.Clone();												// move the coordinate from its grid position in the room to its unit position in the room
 		world_offset.x -= width / 2;
 		world_offset.y -= length / 2;
 		world_offset.x *= tile_size;
@@ -63,11 +63,11 @@ TArray<FTransform> URoom::GridToWorld(TArray<FCoord> coords) {
 		world_offset.y += world.y;
 		world_offset.x += tile_size / 2;
 		world_offset.y += tile_size / 2;
-		FTransform world_trans = FTransform(FVector(world_offset.x, world_offset.y, 0));		// create the FTransform using the world coordinates of the door
-		world_trans.SetRotation(FQuat::MakeFromEuler({ 0.f, 0.f, world_offset.r }));	// rotate the door to match the wall it is against
-		transforms.Add(world_trans);											// add the FTransform to the list
+		FTransform world_trans = FTransform(FVector(world_offset.x, world_offset.y, 0));	// create the FTransform using the world coordinates of the door
+		world_trans.SetRotation(FQuat::MakeFromEuler({ 0.f, 0.f, world_offset.r }));		// rotate the door to match the wall it is against
+		transforms.Add(world_trans);														// add the FTransform to the list
 	}
-	return transforms;															// return the list of FTransforms for all the doors
+	return transforms;																		// return the list of FTransforms for all the doors
 }
 
 bool URoom::IsStart() {

@@ -8,7 +8,7 @@
 #include "MapGenParameters.h"
 #include "MapLayout.generated.h"
 
-UCLASS(Blueprintable)
+UCLASS()
 class MAPGEN_API AMapLayout : public AActor {
 	GENERATED_BODY()
 
@@ -70,6 +70,8 @@ public:
 		UInstancedStaticMeshComponent* wall_ismc;
 
 	AMapLayout();
+	void Init(UStaticMesh* floor_mesh, UStaticMesh* door_mesh, UStaticMesh* wall_mesh);
+	void GenerateMap();
 
 private:
 	FMapGenParameters* param;
@@ -96,8 +98,4 @@ private:
 	* @param y The y position of the room that is being created
 	*/
 	bool ValidLoc(int32 x, int32 y);
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 };
