@@ -31,7 +31,7 @@ public:
 		int32 ROOM_LENGTH = 20;
 	/* The number of Unreal world units represented by each tile */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Constraints")
-		int32 TILE_SIZE = 50;
+		int32 TILE_SIZE = 250;
 	/* The number of tiles that doors should be offset from corners */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Constraints")
 		int32 DOOR_OFFSET = 2;

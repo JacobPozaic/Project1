@@ -1,6 +1,7 @@
 #include "PlayerCharacter.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer) {
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 void APlayerCharacter::BeginPlay() {
@@ -15,6 +16,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* InputComponent
 	Super::SetupPlayerInputComponent(InputComponent);
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
+	InputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
+	InputComponent->BindAxis("Look", this, &APlayerCharacter::AddControllerPitchInput);
 }
 
 void APlayerCharacter::MoveForward(float Value) {

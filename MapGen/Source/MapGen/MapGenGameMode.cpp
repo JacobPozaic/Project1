@@ -6,11 +6,15 @@ UStaticMesh* wall_mesh;
 AMapLayout* map_layout;
 
 AMapGenGameMode::AMapGenGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
-	DefaultPawnClass = APlayerCharacter::StaticClass();
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>floor_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/plane.plane'"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>door_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/door.door'"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>wall_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/wall.wall'"));
+	static ConstructorHelpers::FClassFinder<APawn> player_pawn(TEXT("Pawn'/Game/Player.Player_C'"));
+	if (player_pawn.Class != NULL) {
+		DefaultPawnClass = player_pawn.Class;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> floor_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/plane.plane'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> door_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/door.door'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> wall_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/wall.wall'"));
 
 	floor_mesh = floor_mesh_finder.Object;
 	door_mesh = door_mesh_finder.Object;
