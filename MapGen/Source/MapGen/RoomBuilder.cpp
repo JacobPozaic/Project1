@@ -170,9 +170,23 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 		}
 
 		/* Place torches */
-		int torch_range = 5;
+		int torch_range = 4;
 		for (int x = 1; x < map_layout->ROOM_WIDTH - 1; x++) {
 			for (int y = 1; y < map_layout->ROOM_LENGTH - 1; y++) {
+				if (room_layout->GetTile(x, y) != EMPTY)
+					continue;
+
+				int rotation = -1;	//TODO: rotation
+				if (room_layout->GetTile(x + 1, y) == WALL)
+					rotation = 0;
+				else if (room_layout->GetTile(x - 1, y) == WALL)
+					rotation = 1;
+				else if (room_layout->GetTile(x, y + 1) == WALL)
+					rotation = 2;
+				else if (room_layout->GetTile(x, y - 1) == WALL)
+					rotation = 3;
+				else continue;
+
 				bool torch_in_range = false;
 				for (int range_x = x - torch_range; range_x < x + torch_range; range_x++) {
 					for (int range_y = y - torch_range; range_y < y + torch_range; range_y++) {
@@ -182,17 +196,10 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 								torch_in_range = true;
 					}
 				}
-
-				if (!torch_in_range)
-					if (FMath::RandRange(0.0f, 1.0f) < 0.4f && room_layout->GetTile(x, y) == EMPTY) //TODO: better distribution across range
-						if(room_layout->GetTile(x + 1, y) == WALL)//TODO: rotation
-							room_layout->SetTile(x, y, TORCH);
-						else if (room_layout->GetTile(x - 1, y) == WALL)
-							room_layout->SetTile(x, y, TORCH);
-						else if (room_layout->GetTile(x, y + 1) == WALL)
-							room_layout->SetTile(x, y, TORCH);
-						else if (room_layout->GetTile(x, y - 1) == WALL)
-							room_layout->SetTile(x, y, TORCH);
+					
+				if (!torch_in_range && FMath::RandRange(0.0f, 1.0f) < 0.2f) {
+					room_layout->SetTile(x, y, TORCH);
+				}
 			}
 		}
 

@@ -19,8 +19,12 @@ ATorch::ATorch() {
 	torch_light->AddWorldTransform(FTransform(FVector(0, -90, 400)));
 	torch_light->AddWorldRotation(FQuat::MakeFromEuler(FVector(0, -60, -90)));
 
-	torch_light->Intensity = 10000;
+	torch_light->Intensity = 3;
 	torch_light->LightColor = FColor(255, 127, 0, 255);
+	torch_light->AttenuationRadius = 4096;
+	torch_light->bUseInverseSquaredFalloff = false;
+	torch_light->LightFalloffExponent = 2;
+	torch_light->MinRoughness = 0.5f;
 
 	torch_light->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);	// make it a child of the root component
 }
