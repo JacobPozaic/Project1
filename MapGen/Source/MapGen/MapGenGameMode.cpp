@@ -6,7 +6,6 @@ UStaticMesh* wall_mesh;
 AMapLayout* map_layout;
 
 AMapGenGameMode::AMapGenGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
-
 	static ConstructorHelpers::FClassFinder<APawn> player_pawn(TEXT("Pawn'/Game/Player.Player_C'"));
 	if (player_pawn.Class != NULL) {
 		DefaultPawnClass = player_pawn.Class;

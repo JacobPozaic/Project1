@@ -142,6 +142,14 @@ void AMapLayout::GenerateMap() {
 		TArray<FTransform> wallPos = cur->GetWallTransforms();
 		for (int32 j = 0; j < wallPos.Num(); j++)
 			wall_ismc->AddInstance(wallPos[j]);
+
+		/* Place torches around each room */
+		TArray<FTransform> torchPos = cur->GetTorchTransforms();
+		for (int32 j = 0; j < torchPos.Num(); j++) {
+			//TODO: move torches to blueprint that is movable with light
+			FActorSpawnParameters spawn_info;
+			GetWorld()->SpawnActor(ATorch::StaticClass(), &torchPos[j], spawn_info);
+		}
 	}
 }
 

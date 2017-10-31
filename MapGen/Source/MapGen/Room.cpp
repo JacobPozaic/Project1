@@ -51,6 +51,18 @@ TArray<FTransform> URoom::GetWallTransforms() {
 	return GridToWorld(walls);
 }
 
+void URoom::SetTorchPositions(TArray<FCoord> torch) {
+	this->torch = torch;
+}
+
+TArray<FCoord> URoom::GetTorchPositions() {
+	return torch;
+}
+
+TArray<FTransform> URoom::GetTorchTransforms() {
+	return GridToWorld(torch);
+}
+
 TArray<FTransform> URoom::GridToWorld(TArray<FCoord> coords) {
 	TArray<FTransform> transforms;															// stores the FTransform for all doors in this room
 	for (FCoord coord : coords) {															// for every door

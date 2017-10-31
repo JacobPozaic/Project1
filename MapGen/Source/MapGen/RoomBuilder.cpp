@@ -51,7 +51,6 @@ URoom* FRoomBuilder::BuildRoom(FMapGenParameters* map_layout, FCoord pos, URoom*
 	return room;
 }
 
-//TODO: comment and format
 void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 	int32 width = room->width;
 	int32 length = room->length;
@@ -170,10 +169,37 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 			}
 		}
 
+		/* Place torches */
+		int torch_range = 5;
+		for (int x = 1; x < map_layout->ROOM_WIDTH - 1; x++) {
+			for (int y = 1; y < map_layout->ROOM_LENGTH - 1; y++) {
+				bool torch_in_range = false;
+				for (int range_x = x - torch_range; range_x < x + torch_range; range_x++) {
+					for (int range_y = y - torch_range; range_y < y + torch_range; range_y++) {
+						if (torch_in_range) break;
+						if (range_x >= 1 && range_x <= map_layout->ROOM_WIDTH - 1 && range_y >= 1 && range_y <= map_layout->ROOM_LENGTH - 1)
+							if (room_layout->GetTile(range_x, range_y) == TORCH)
+								torch_in_range = true;
+					}
+				}
+
+				if (!torch_in_range)
+					if (FMath::RandRange(0.0f, 1.0f) < 0.4f && room_layout->GetTile(x, y) == EMPTY) //TODO: better distribution across range
+						if(room_layout->GetTile(x + 1, y) == WALL)//TODO: rotation
+							room_layout->SetTile(x, y, TORCH);
+						else if (room_layout->GetTile(x - 1, y) == WALL)
+							room_layout->SetTile(x, y, TORCH);
+						else if (room_layout->GetTile(x, y + 1) == WALL)
+							room_layout->SetTile(x, y, TORCH);
+						else if (room_layout->GetTile(x, y - 1) == WALL)
+							room_layout->SetTile(x, y, TORCH);
+			}
+		}
+
 		/* Randomly add other hazards where they will not block the player from navigating the room */
 		/* It might be better to not have randomly generated walls */
-		while (room_layout->Coverage(WALL) <  map_layout->ROOM_COVERAGE_MAX) {
-			if (FMath::RandRange(0.0f, 1.0f) >  map_layout->RAND_WALL_CHANCE) {
+		while (room_layout->Coverage(WALL) < map_layout->ROOM_COVERAGE_MAX) {
+			if (FMath::RandRange(0.0f, 1.0f) > map_layout->RAND_WALL_CHANCE) { //todo: pretty sure this is backwards
 				int32 wall_width = FMath::RandRange(1, (int32)(width *  map_layout->RAND_WALL_WIDTH_SIZE_RATIO));
 				int32 wall_length = FMath::RandRange(1, (int32)(length *  map_layout->RAND_WALL_LENGTH_SIZE_RATIO));
 				FCoord pos;
@@ -215,6 +241,7 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 	
 	/* Convert grid to FCoords and put them in the URoom */
 	room->SetWallPositions(room_layout->GetAllPosOfType(WALL));
+	room->SetTorchPositions(room_layout->GetAllPosOfType(TORCH));
 }
 
 Pos FRoomBuilder::GetClosestPoint(Pos start, TArray<Pos>* points) {

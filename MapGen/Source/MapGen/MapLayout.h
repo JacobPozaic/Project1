@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "GameFramework/Actor.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Torch.h"
 #include "Room.h"
 #include "RoomBuilder.h"
 #include "MapGenParameters.h"
