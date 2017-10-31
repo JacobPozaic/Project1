@@ -10,23 +10,23 @@ ATorch::ATorch() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> torch_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/torch.torch'"));
 	torch_mesh_model = torch_mesh_finder.Object;
 	torch_mesh->SetStaticMesh(torch_mesh_model);
-	FLightingChannels torch_channels = FLightingChannels();
-	torch_channels.bChannel0 = 0;
-	torch_mesh->LightingChannels = torch_channels;
+	torch_mesh->CastShadow = 0;
 
 	torch_light = CreateDefaultSubobject<UPointLightComponent>(TEXT("Torch Light"));
 
-	torch_light->AddWorldTransform(FTransform(FVector(0, -90, 400)));
+	torch_light->AddWorldTransform(FTransform(FVector(0, -30, 450)));
 	torch_light->AddWorldRotation(FQuat::MakeFromEuler(FVector(0, -60, -90)));
 
-	torch_light->Intensity = 3;
+	torch_light->Intensity = 4;
 	torch_light->LightColor = FColor(255, 127, 0, 255);
-	torch_light->AttenuationRadius = 4096;
+	torch_light->AttenuationRadius = 2048;
 	torch_light->bUseInverseSquaredFalloff = false;
-	torch_light->LightFalloffExponent = 2;
+	torch_light->LightFalloffExponent = 3;
 	torch_light->MinRoughness = 0.5f;
 
-	torch_light->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);	// make it a child of the root component
+	torch_light->Mobility = EComponentMobility::Stationary;
+
+	torch_light->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
 
 void ATorch::BeginPlay() {

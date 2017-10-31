@@ -130,8 +130,12 @@ void AMapLayout::GenerateMap() {
 	for (int32 i = 0; i < rooms.Num(); i++) {
 		URoom* cur = rooms[i];
 
-		/* Place the floor for the room in the world */
-		floor_ismc->AddInstance(cur->GetWorldPosition());
+		/* Place the floor and cealing for the room in the world */
+		FTransform floor = cur->GetWorldPosition();
+		floor_ismc->AddInstance(floor);
+		floor.SetRotation(FQuat::MakeFromEuler(FVector(0, 180, 0)));
+		floor.AddToTranslation(FVector(0, 0, 500));
+		floor_ismc->AddInstance(floor);
 
 		/* Place doors in the world */
 		TArray<FTransform> doorPos = cur->GetDoorTransforms();
@@ -146,7 +150,6 @@ void AMapLayout::GenerateMap() {
 		/* Place torches around each room */
 		TArray<FTransform> torchPos = cur->GetTorchTransforms();
 		for (int32 j = 0; j < torchPos.Num(); j++) {
-			//TODO: move torches to blueprint that is movable with light
 			FActorSpawnParameters spawn_info;
 			GetWorld()->SpawnActor(ATorch::StaticClass(), &torchPos[j], spawn_info);
 		}

@@ -48,7 +48,7 @@ public:
 		float ROOM_COVERAGE_MAX = 0.3f;
 	/* The chance that a extra walls are placed in the room */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
-		float RAND_WALL_CHANCE = 0.25f;
+		float RAND_WALL_CHANCE = 0.75f;
 	/* The ratio between room width and the largest wall peice that can be placed in the room */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
 		float RAND_WALL_WIDTH_SIZE_RATIO = 0.25f;

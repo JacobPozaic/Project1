@@ -1,1 +1,4 @@
 Brick.jpg - http://texturelib.com/texture/?path=/Textures/brick/modern/brick_modern_0123
+Brick_Floor.jpg - http://texturelib.com/texture/?path=/Textures/brick/pavement/brick_pavement_0060
+Torch.png uses http://www.mb3d.co.uk/mb3d/Food_n_Signs_n_Other_useful_Seamless_and_Tileable_High_Res_Textures_files/Rope_01_UV_M_CM_1.jpg
+and http://texturelib.com/texture/?path=/Textures/wood/old/wood_old_0018
