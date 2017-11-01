@@ -80,7 +80,6 @@ AMapLayout::AMapLayout() {
 	param->TEMPLATE_SIZE_RATIO = TEMPLATE_SIZE_RATIO;
 	param->PATH_POINT_DIST = PATH_POINT_DIST;
 	param->ROOM_COVERAGE_MAX = ROOM_COVERAGE_MAX;
-	param->RAND_WALL_CHANCE = RAND_WALL_CHANCE;
 	param->RAND_WALL_WIDTH_SIZE_RATIO = RAND_WALL_WIDTH_SIZE_RATIO;
 	param->RAND_WALL_LENGTH_SIZE_RATIO = RAND_WALL_LENGTH_SIZE_RATIO;
 }
@@ -152,6 +151,13 @@ void AMapLayout::GenerateMap() {
 		for (int32 j = 0; j < torchPos.Num(); j++) {
 			FActorSpawnParameters spawn_info;
 			GetWorld()->SpawnActor(ATorch::StaticClass(), &torchPos[j], spawn_info);
+		}
+
+		/* Place barrels around each room */
+		TArray<FTransform> barrelPos = cur->GetBarrelTransforms();
+		for (int32 j = 0; j < barrelPos.Num(); j++) {
+			FActorSpawnParameters spawn_info;
+			GetWorld()->SpawnActor(ABarrel::StaticClass(), &barrelPos[j], spawn_info);
 		}
 	}
 }

@@ -9,6 +9,7 @@ ATorch::ATorch() {
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> torch_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/torch.torch'"));
 	torch_mesh_model = torch_mesh_finder.Object;
+	
 	torch_mesh->SetStaticMesh(torch_mesh_model);
 	torch_mesh->CastShadow = 0;
 

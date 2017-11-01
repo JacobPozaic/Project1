@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Torch.h"
+#include "Barrel.h"
 #include "Room.h"
 #include "RoomBuilder.h"
 #include "MapGenParameters.h"
@@ -45,10 +46,7 @@ public:
 		float PATH_POINT_DIST = 6.0f;
 	/* The maximum amount of tiles in a room that should be occupied by obstacles */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
-		float ROOM_COVERAGE_MAX = 0.3f;
-	/* The chance that a extra walls are placed in the room */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
-		float RAND_WALL_CHANCE = 0.75f;
+		float ROOM_COVERAGE_MAX = 0.35f;
 	/* The ratio between room width and the largest wall peice that can be placed in the room */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
 		float RAND_WALL_WIDTH_SIZE_RATIO = 0.25f;

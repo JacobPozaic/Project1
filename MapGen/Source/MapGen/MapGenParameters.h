@@ -25,8 +25,6 @@ public:
 	float PATH_POINT_DIST;
 	/* The maximum amount of tiles in a room that should be occupied by obstacles */
 	float ROOM_COVERAGE_MAX;
-	/* The chance that a extra walls are placed in the room */
-	float RAND_WALL_CHANCE;
 	/* The ratio between room width and the largest wall peice that can be placed in the room */
 	float RAND_WALL_WIDTH_SIZE_RATIO;
 	/* The ratio between room length and the largest wall peice that can be placed in the room */

@@ -21,5 +21,5 @@ public:
 
 	TArray<FCoord> GetAllPosOfType(ETileType type);
 
-	float Coverage(ETileType type);
+	float Coverage();
 };

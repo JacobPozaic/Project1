@@ -63,6 +63,18 @@ TArray<FTransform> URoom::GetTorchTransforms() {
 	return GridToWorld(torch);
 }
 
+void URoom::SetBarrelPositions(TArray<FCoord> barrel) {
+	this->barrel = barrel;
+}
+
+TArray<FCoord> URoom::GetBarrelPositions() {
+	return barrel;
+}
+
+TArray<FTransform> URoom::GetBarrelTransforms() {
+	return GridToWorld(barrel);
+}
+
 TArray<FTransform> URoom::GridToWorld(TArray<FCoord> coords) {
 	TArray<FTransform> transforms;															// stores the FTransform for all doors in this room
 	for (FCoord coord : coords) {															// for every door
