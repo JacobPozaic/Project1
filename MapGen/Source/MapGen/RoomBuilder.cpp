@@ -219,7 +219,7 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 					for (int y = 1; y < map_layout->ROOM_LENGTH - 1; y++)
 						if (room_layout->GetTile(x, y) == EMPTY)
 							pos.Add(FCoord(x, y));
-				int rand = FMath::RandRange(0, pos.Num());
+				int rand = FMath::RandRange(0, pos.Num() - 1);
 				room_layout->SetTile(pos[rand].x, pos[rand].y, BARREL);
 			}
 			

@@ -15,7 +15,7 @@ ATorch::ATorch() {
 
 	torch_light = CreateDefaultSubobject<UPointLightComponent>(TEXT("Torch Light"));
 
-	torch_light->AddWorldTransform(FTransform(FVector(0, -30, 450)));
+	torch_light->AddWorldTransform(FTransform(FVector(0, -50, 450)));
 	torch_light->AddWorldRotation(FQuat::MakeFromEuler(FVector(0, -60, -90)));
 
 	torch_light->Intensity = 4;
@@ -28,9 +28,16 @@ ATorch::ATorch() {
 	torch_light->Mobility = EComponentMobility::Stationary;
 
 	torch_light->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> torch_fire_finder(TEXT("ParticleSystem'/Game/Res/Particles/TorchFire.TorchFire'"));
+	torch_fire = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Torch Fire"));
+	torch_fire->Template = torch_fire_finder.Object;
+	torch_fire->bAutoActivate = true;
+	torch_fire->SetHiddenInGame(false);
 }
 
 void ATorch::BeginPlay() {
 	Super::BeginPlay();
+	torch_fire->AttachTo(torch_light);
 }
 

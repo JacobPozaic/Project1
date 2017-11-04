@@ -15,6 +15,8 @@ public:
 		UStaticMeshComponent* torch_mesh;
 	UPROPERTY(EditAnywhere)
 		UPointLightComponent* torch_light;
+	UPROPERTY(EditAnywhere)
+		UParticleSystemComponent* torch_fire;
 	ATorch();
 
 protected:
