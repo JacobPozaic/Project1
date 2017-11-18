@@ -18,6 +18,14 @@ private:
 	 */
 	static Pos FRoomBuilder::GetClosestPoint(Pos start, TArray<Pos>* points);
 
+	/**
+	 * Adds torches to a room.
+	 *
+	 * @param map_layout 
+	 * @param room_layout The FGrid representing the rooms layout
+	 */
+	static TArray<FCoord> FRoomBuilder::AddTorches(FMapGenParameters* map_layout, FGrid* room_layout);
+
 public:
 	/**
 	 * Creates a URoom and returns a pointer to it.
