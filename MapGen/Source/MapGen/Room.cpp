@@ -75,6 +75,19 @@ TArray<FTransform> URoom::GetBarrelTransforms() {
 	return GridToWorld(barrel);
 }
 
+void URoom::SetCratePositions(TArray<FCoord> crate) {
+	this->crate = crate;
+}
+
+TArray<FCoord> URoom::GetCratePositions() {
+	return crate;
+}
+
+TArray<FTransform> URoom::GetCrateTransforms() {
+	return GridToWorld(crate);
+}
+
+
 TArray<FTransform> URoom::GridToWorld(TArray<FCoord> coords) {
 	TArray<FTransform> transforms;															// stores the FTransform for all doors in this room
 	for (FCoord coord : coords) {															// for every door

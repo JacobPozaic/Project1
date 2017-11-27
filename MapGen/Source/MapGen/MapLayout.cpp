@@ -159,6 +159,14 @@ void AMapLayout::GenerateMap() {
 			FActorSpawnParameters spawn_info;
 			GetWorld()->SpawnActor(ABarrel::StaticClass(), &barrelPos[j], spawn_info);
 		}
+
+		/* Place crates around each room */
+		TArray<FTransform> cratePos = cur->GetCrateTransforms();
+		for (int32 j = 0; j < cratePos.Num(); j++) {
+			FActorSpawnParameters spawn_info;
+			cratePos[j].SetRotation(FQuat::MakeFromEuler(FVector(0, 0, FMath::RandRange(0.0f, 360.0f))));	// Rotate the crate to a random direction
+			GetWorld()->SpawnActor(ACrate::StaticClass(), &cratePos[j], spawn_info);
+		}
 	}
 }
 

@@ -5,6 +5,7 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Torch.h"
 #include "Barrel.h"
+#include "Crate.h"
 #include "Room.h"
 #include "RoomBuilder.h"
 #include "MapGenParameters.h"

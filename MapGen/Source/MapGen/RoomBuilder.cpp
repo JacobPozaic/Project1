@@ -171,7 +171,7 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 
 		/* Randomly add other hazards where they will not block the player from navigating the room */
 		while (room_layout->Coverage() < map_layout->ROOM_COVERAGE_MAX) {
-			int32 rand = FMath::RandRange(0, 300);
+			int32 rand = FMath::RandRange(0, 350);
 			if (rand < 100) {
 				/* Place barrels */
 				int32 RAND_BARREL_CHANCE = 0.5f;
@@ -183,6 +183,16 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 				int32 rand = FMath::RandRange(0, pos.Num() - 1);
 				room_layout->SetTile(pos[rand].x, pos[rand].y, BARREL);
 			} else if (rand < 200) {
+					/* Place crates */
+					int32 RAND_CRATE_CHANCE = 0.5f;
+					TArray<Pos> pos;
+					for (int32 x = 1; x < map_layout->ROOM_WIDTH - 1; x++)
+						for (int32 y = 1; y < map_layout->ROOM_LENGTH - 1; y++)
+							if (room_layout->GetTile(x, y) == EMPTY)
+								pos.Add(Pos(x, y));
+					int32 rand = FMath::RandRange(0, pos.Num() - 1);
+					room_layout->SetTile(pos[rand].x, pos[rand].y, CRATE);
+			} else if (rand < 300) {
 				/* Place walls */
 				int32 wall_width = FMath::RandRange(1, (int32)(width *  map_layout->RAND_WALL_WIDTH_SIZE_RATIO));
 				int32 wall_length = FMath::RandRange(1, (int32)(length *  map_layout->RAND_WALL_LENGTH_SIZE_RATIO));
@@ -225,6 +235,7 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 	/* Convert grid to FCoords and put them in the URoom */
 	room->SetWallPositions(room_layout->GetAllPosOfType(WALL));
 	room->SetBarrelPositions(room_layout->GetAllPosOfType(BARREL));
+	room->SetCratePositions(room_layout->GetAllPosOfType(CRATE));
 }
 
 Pos FRoomBuilder::GetClosestPoint(Pos start, TArray<Pos>* points) {

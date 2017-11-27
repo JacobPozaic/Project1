@@ -18,6 +18,7 @@ private:
 	TArray<FCoord> doors;				// stores the location of each door in the room
 	TArray<FCoord> torch;
 	TArray<FCoord> barrel;
+	TArray<FCoord> crate;
 
 	TArray<FTransform> GridToWorld(TArray<FCoord> coords);
 
@@ -73,14 +74,23 @@ public:
 	/* Gets the FTransform for every wall belonging to this Room */
 	TArray<FTransform> GetTorchTransforms();
 
-	/* Sets the Wall positions */
+	/* Sets the Barrel positions */
 	void SetBarrelPositions(TArray<FCoord> barrel);
 
-	/* Gets the FCoord for every wall belonging to this Room */
+	/* Gets the FCoord for every barrel belonging to this Room */
 	TArray<FCoord> GetBarrelPositions();
 
-	/* Gets the FTransform for every wall belonging to this Room */
+	/* Gets the FTransform for every barrel belonging to this Room */
 	TArray<FTransform> GetBarrelTransforms();
+
+	/* Sets the Crate positions */
+	void SetCratePositions(TArray<FCoord> crate);
+
+	/* Gets the FCoord for every crate belonging to this Room */
+	TArray<FCoord> GetCratePositions();
+
+	/* Gets the FTransform for every crate belonging to this Room */
+	TArray<FTransform> GetCrateTransforms();
 
 	/* Gets if this is the start room */
 	bool IsStart();
