@@ -10,6 +10,8 @@ class MAPGEN_API ABarrel : public AActor {
 
 public:
 	UPROPERTY()
+		USphereComponent* root;
+	UPROPERTY()
 		UStaticMesh* barrel_mesh_model;
 	UPROPERTY(EditAnywhere)
 		UStaticMeshComponent* barrel_mesh;

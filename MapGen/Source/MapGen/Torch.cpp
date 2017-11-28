@@ -5,7 +5,6 @@ ATorch::ATorch() {
 	RootComponent = root;																			// set the sphere as the root component
 
 	torch_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Torch Mesh"));
-	torch_mesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> torch_mesh_finder(TEXT("StaticMesh'/Game/Res/Meshes/torch.torch'"));
 	torch_mesh_model = torch_mesh_finder.Object;
@@ -27,8 +26,6 @@ ATorch::ATorch() {
 
 	torch_light->Mobility = EComponentMobility::Stationary;
 
-	torch_light->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> torch_fire_finder(TEXT("ParticleSystem'/Game/Res/Particles/TorchFire.TorchFire'"));
 	torch_fire = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Torch Fire"));
 	torch_fire->Template = torch_fire_finder.Object;
@@ -38,6 +35,9 @@ ATorch::ATorch() {
 
 void ATorch::BeginPlay() {
 	Super::BeginPlay();
-	torch_fire->AttachTo(torch_light);
+	RegisterAllComponents();
+	torch_mesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	torch_fire->AttachToComponent(torch_light, FAttachmentTransformRules::KeepRelativeTransform);
+	torch_light->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 

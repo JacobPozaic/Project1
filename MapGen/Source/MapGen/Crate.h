@@ -10,6 +10,8 @@ class MAPGEN_API ACrate : public AActor {
 
 public:
 	UPROPERTY()
+		USphereComponent* root;
+	UPROPERTY()
 		UStaticMesh* crate_mesh_model;
 	UPROPERTY(EditAnywhere)
 		UStaticMeshComponent* crate_mesh;

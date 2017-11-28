@@ -24,8 +24,8 @@ bool FGrid::SetTile(int32 x, int32 y, ETileType type) {
 
 TArray<FCoord> FGrid::GetAllPosOfType(ETileType type) {
 	TArray<FCoord> pos;
-	for (int x = 0; x < grid.at(0).size(); x++)
-		for (int y = 0; y < grid.size(); y++)
+	for (size_t x = 0; x < grid[0].size(); x++)
+		for (size_t y = 0; y < grid.size(); y++)
 			if (grid[y][x] == type)
 				pos.Add(FCoord(x, y));
 	return pos;
@@ -33,9 +33,9 @@ TArray<FCoord> FGrid::GetAllPosOfType(ETileType type) {
 
 float FGrid::Coverage() {
 	int32 count = 0;
-	for (int x = 0; x < grid.at(0).size(); x++)
-		for (int y = 0; y < grid.size(); y++)
+	for (size_t x = 0; x < grid[0].size(); x++)
+		for (size_t y = 0; y < grid.size(); y++)
 			if (grid[y][x] != EMPTY)
 				count++;
-	return count / (float)(grid.at(0).size() * grid.size());
+	return count / (float)(grid[0].size() * grid.size());
 }

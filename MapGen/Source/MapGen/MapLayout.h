@@ -98,4 +98,7 @@ private:
 	* @param y The y position of the room that is being created
 	*/
 	bool ValidLoc(int32 x, int32 y);
+
+protected:
+	virtual void BeginPlay() override;
 };

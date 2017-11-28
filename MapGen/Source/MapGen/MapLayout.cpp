@@ -61,13 +61,8 @@ AMapLayout::AMapLayout() {
 	RootComponent = root;																			// set the sphere as the root component
 
 	floor_ismc = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Floor Instances"));	// create the instanced mesh component for placing floors down for each room
-	floor_ismc->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);	// make it a child of the root component
-
 	door_ismc = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Door Instances"));		// create the instanced mesh component for placing doors between each room
-	door_ismc->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);		// make it a child of the root component
-
 	wall_ismc = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Wall Instances"));		// create the instanced mesh component for placing walls
-	wall_ismc->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);		// make it a child of the root component
 
 	param = new FMapGenParameters();
 	param->MAIN_CHAIN_MIN = MAIN_CHAIN_MIN;
@@ -91,8 +86,6 @@ void AMapLayout::Init(UStaticMesh* floor_mesh, UStaticMesh* door_mesh, UStaticMe
 }
 
 void AMapLayout::GenerateMap() {
-	this->RegisterAllComponents();
-
 	/* Set the mesh for each ISMC */
 	floor_ismc->SetStaticMesh(floor_mesh);
 	door_ismc->SetStaticMesh(door_mesh);
@@ -175,4 +168,13 @@ bool AMapLayout::ValidLoc(int32 x, int32 y) {
 		if ((*rooms[i]).PosEquals(x, y))
 			return false;
 	return true;
+}
+
+void AMapLayout::BeginPlay() {
+	Super::BeginPlay();
+	RegisterAllComponents();
+
+	floor_ismc->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);	// make it a child of the root component
+	door_ismc->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);		// make it a child of the root component
+	wall_ismc->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);		// make it a child of the root component
 }
