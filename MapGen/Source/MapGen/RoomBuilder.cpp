@@ -65,7 +65,8 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 		if (((int32)(door.r / 90.0f) % 2) == 0) {
 			room_layout->SetTile(door.x, door.y - 1, DOOR);
 			room_layout->SetTile(door.x, door.y + 1, DOOR);
-		} else {
+		}
+		else {
 			room_layout->SetTile(door.x - 1, door.y, DOOR);
 			room_layout->SetTile(door.x + 1, door.y, DOOR);
 		}
@@ -86,11 +87,13 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 		/* Place torches */
 		room->SetTorchPositions(AddTorches(map_layout, room_layout));
 		//TODO: place start
-	} else if(room->IsExit()) {
+	}
+	else if (room->IsExit()) {
 		/* Place torches */
 		room->SetTorchPositions(AddTorches(map_layout, room_layout));
 		//TODO: place exit
-	} else {
+	}
+	else {
 		/* Add template to room */
 		int32 random_chance = FMath::RandRange(0, 300);
 		int32 half_width = width / 2;
@@ -111,7 +114,8 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 				}
 			}
 			room_layout->SetTiles(cylinder, WALL);
-		} else if (random_chance < 200) {
+		}
+		else if (random_chance < 200) {
 			/* Square in room */
 			int32 sq_width = FMath::RandRange(1, (int32)(half_width * map_layout->TEMPLATE_SIZE_RATIO));
 			int32 sq_length = FMath::RandRange(1, (int32)(half_length * map_layout->TEMPLATE_SIZE_RATIO));
@@ -134,14 +138,16 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 					if (doors[i].x < doors[j].x) {
 						min_x = doors[i].x + 1;
 						max_x = doors[j].x - 1;
-					} else {
+					}
+					else {
 						min_x = doors[j].x + 1;
 						max_x = doors[i].x - 1;
 					}
 					if (doors[i].y < doors[j].y) {
 						min_y = doors[i].y + 1;
 						max_y = doors[j].y - 1;
-					} else {
+					}
+					else {
 						min_y = doors[j].y + 1;
 						max_y = doors[i].y - 1;
 					}
@@ -161,8 +167,10 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 							Path::FindPath(last, next, room_layout);
 						}
 						Path::FindPath(next, doors[j], room_layout);
-					} else Path::FindPath(doors[i], doors[j], room_layout);
-				} else Path::FindPath(doors[i], doors[j], room_layout);
+					}
+					else Path::FindPath(doors[i], doors[j], room_layout);
+				}
+				else Path::FindPath(doors[i], doors[j], room_layout);
 			}
 		}
 
@@ -181,7 +189,8 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 							pos.Add(Pos(x, y));
 				int32 rand = FMath::RandRange(0, pos.Num() - 1);
 				room_layout->SetTile(pos[rand].x, pos[rand].y, BARREL);
-			} else if (rand < 100) {
+			}
+			else if (rand < 100) {
 				/* Place crates */
 				TArray<Pos> pos;
 				for (int32 x = 1; x < map_layout->ROOM_WIDTH - 1; x++)
@@ -190,7 +199,8 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 							pos.Add(Pos(x, y));
 				int32 rand = FMath::RandRange(0, pos.Num() - 1);
 				room_layout->SetTile(pos[rand].x, pos[rand].y, CRATE);
-			} else if (rand < 250) {
+			}
+			else if (rand < 250) {
 				/* Place walls */
 				int32 wall_width = FMath::RandRange(1, (int32)(width *  map_layout->RAND_WALL_WIDTH_SIZE_RATIO));
 				int32 wall_length = FMath::RandRange(1, (int32)(length *  map_layout->RAND_WALL_LENGTH_SIZE_RATIO));
@@ -229,7 +239,7 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 			}
 		}
 	}
-	
+
 	/* Convert grid to FCoords and put them in the URoom */
 	room->SetWallPositions(room_layout->GetAllPosOfType(WALL));
 	room->SetBarrelPositions(room_layout->GetAllPosOfType(BARREL));
@@ -254,32 +264,33 @@ Pos FRoomBuilder::GetClosestPoint(Pos start, TArray<Pos>* points) {
 
 TArray<FCoord> FRoomBuilder::AddTorches(FMapGenParameters* map_layout, FGrid* room_layout) {
 	/* Find all valid positions for a torch */
-	int32 torch_range = 5;
 	TArray<FCoord> torch_possible_locations;
 	for (int32 x = 1; x < map_layout->ROOM_WIDTH - 1; x++) {
 		for (int32 y = 1; y < map_layout->ROOM_LENGTH - 1; y++) {
-			ETileType tile = room_layout->GetTile(x, y);
-			if (tile != EMPTY && tile != PATH) continue;
+			if (room_layout->GetTile(x, y) == EMPTY) {
+				int32 rotation = 0;
+				if (room_layout->GetTile(x + 1, y) == WALL)
+					rotation = 1;
+				else if (room_layout->GetTile(x - 1, y) == WALL)
+					rotation = -1;
+				else if (room_layout->GetTile(x, y + 1) == WALL)
+					rotation = 2;
+				else if (room_layout->GetTile(x, y - 1) == WALL)
+					rotation = 0;
+				else continue;
 
-			int32 rotation = 0;
-			if (room_layout->GetTile(x + 1, y) == WALL)
-				rotation = 1;
-			else if (room_layout->GetTile(x - 1, y) == WALL)
-				rotation = -1;
-			else if (room_layout->GetTile(x, y + 1) == WALL)
-				rotation = 2;
-			else if (room_layout->GetTile(x, y - 1) == WALL)
-				rotation = 0;
-			else continue;
-
-			torch_possible_locations.Add(FCoord(x, y, rotation * 90.0f));
+				torch_possible_locations.Add(FCoord(x, y, rotation * 90.0f));
+			}
 		}
 	}
 
 	TArray<FCoord> shuffled;
 	/* Shuffle the possible torch locations so that torches are more randomly distributed and remove 25% of the possible torches */
 	while (torch_possible_locations.Num() > 0) {
-		if (FMath::RandRange(0, 100) <= 25) continue;
+		if (FMath::RandRange(0, 100) <= 25) {
+			torch_possible_locations.RemoveAt(0);
+			continue;
+		}
 		int32 index = FMath::RandRange(0, torch_possible_locations.Num() - 1);
 		shuffled.Add(torch_possible_locations[index]);
 		torch_possible_locations.RemoveAt(index);
@@ -289,15 +300,23 @@ TArray<FCoord> FRoomBuilder::AddTorches(FMapGenParameters* map_layout, FGrid* ro
 	TArray<FCoord> torch_locations;
 	for (FCoord torch : shuffled) {
 		bool torch_in_range = false;
+		TArray<FCoord> torches = room_layout->GetAllPosOfType(TORCH);
+		for (FCoord existing_torch : torches) {
+			if (torch.DistanceTo(existing_torch) <= 5.0f) {
+				torch_in_range = true;
+				break;
+			}
+		}
+		/* No idea why this doesnt work
 		for (int32 range_x = torch.x - torch_range; range_x < torch.x + torch_range; range_x++) {
 			if (torch_in_range) break;
 			for (int32 range_y = torch.y - torch_range; range_y < torch.y + torch_range; range_y++) {
 				if (torch_in_range) break;
-				if (range_x >= 0 && range_x < map_layout->ROOM_WIDTH && range_y >= 0 && range_y <= map_layout->ROOM_LENGTH)
+				if (range_x > 0 && range_x < map_layout->ROOM_WIDTH && range_y > 0 && range_y < map_layout->ROOM_LENGTH)
 					if (room_layout->GetTile(range_x, range_y) == TORCH)
 						torch_in_range = true;
 			}
-		}
+		} */
 
 		if (!torch_in_range) {
 			room_layout->SetTile(torch.x, torch.y, TORCH);
