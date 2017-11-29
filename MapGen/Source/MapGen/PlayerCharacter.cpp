@@ -16,30 +16,43 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* InputComponent
 	Super::SetupPlayerInputComponent(InputComponent);
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
+	InputComponent->BindAxis("MoveUp", this, &APlayerCharacter::MoveUp);
 	InputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
 	InputComponent->BindAxis("Look", this, &APlayerCharacter::AddControllerPitchInput);
+	InputComponent->BindAction("ToggleFlying", IE_Pressed, this, &APlayerCharacter::ToggleFlying);
 }
 
-void APlayerCharacter::MoveForward(float Value) {
-	if ((Controller != NULL) && (Value != 0.0f)) {
-		// find out which way is forward
-		FRotator Rotation = Controller->GetControlRotation();
-		// Limit pitch when walking or falling
-		if (GetCharacterMovement()->IsMovingOnGround() || GetCharacterMovement()->IsFalling()) {
-			Rotation.Pitch = 0.0f;
-		}
-		// add movement in that direction
-		const FVector Direction = FRotationMatrix(Rotation).GetScaledAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+void APlayerCharacter::MoveForward(float distance) {
+	if ((Controller != NULL) && (distance != 0.0f)) {
+		// calculate forward direction for the players current rotation
+		const FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
+		AddMovementInput(Direction, distance);
 	}
 }
 
-void APlayerCharacter::MoveRight(float Value) {
-	if ((Controller != NULL) && (Value != 0.0f)) {
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FVector Direction = FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
+void APlayerCharacter::MoveRight(float distance) {
+	if ((Controller != NULL) && (distance != 0.0f)) {
+		// calculate direction right for the players current rotation
+		const FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
+		AddMovementInput(Direction, distance);
+	}
+}
+
+void APlayerCharacter::MoveUp(float distance) {
+	if ((Controller != NULL) && (distance != 0.0f)) {
+		// direction upwards for the players current rotation
+		AddMovementInput(FVector(0, 0, 1), distance);
+	}
+}
+
+void APlayerCharacter::ToggleFlying() {
+	if (GetCharacterMovement()->IsFlying()) {
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		bSimGravityDisabled = false;
+	} else {
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		GetCharacterMovement()->BrakingDecelerationFlying = 1000.0f;
+		GetCharacterMovement()->MaxFlySpeed = 2400;
+		bSimGravityDisabled = true;
 	}
 }

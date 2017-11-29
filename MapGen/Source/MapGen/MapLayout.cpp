@@ -61,6 +61,7 @@ AMapLayout::AMapLayout() {
 	RootComponent = root;																			// set the sphere as the root component
 
 	floor_ismc = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Floor Instances"));	// create the instanced mesh component for placing floors down for each room
+	ceil_ismc = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Ceiling Instances"));	// create the instanced mesh component for placing cealings in each room
 	door_ismc = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Door Instances"));		// create the instanced mesh component for placing doors between each room
 	wall_ismc = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Wall Instances"));		// create the instanced mesh component for placing walls
 
@@ -79,8 +80,9 @@ AMapLayout::AMapLayout() {
 	param->RAND_WALL_LENGTH_SIZE_RATIO = RAND_WALL_LENGTH_SIZE_RATIO;
 }
 
-void AMapLayout::Init(UStaticMesh* floor_mesh, UStaticMesh* door_mesh, UStaticMesh* wall_mesh) {
+void AMapLayout::Init(UStaticMesh* floor_mesh, UStaticMesh* ceil_mesh, UStaticMesh* door_mesh, UStaticMesh* wall_mesh) {
 	this->floor_mesh = floor_mesh;
+	this->ceil_mesh = ceil_mesh;
 	this->door_mesh = door_mesh;
 	this->wall_mesh = wall_mesh;
 }
@@ -88,11 +90,16 @@ void AMapLayout::Init(UStaticMesh* floor_mesh, UStaticMesh* door_mesh, UStaticMe
 void AMapLayout::GenerateMap() {
 	/* Set the mesh for each ISMC */
 	floor_ismc->SetStaticMesh(floor_mesh);
+	ceil_ismc->SetStaticMesh(ceil_mesh);
 	door_ismc->SetStaticMesh(door_mesh);
 	wall_ismc->SetStaticMesh(wall_mesh);
+
+	/* Disable collision on the ceiling, so that the player can fly above and view the map */
+	
 	
 	/* Clear all instanced meshes */
 	floor_ismc->ClearInstances();
+	ceil_ismc->ClearInstances();
 	door_ismc->ClearInstances();
 	wall_ismc->ClearInstances();
 
@@ -127,7 +134,7 @@ void AMapLayout::GenerateMap() {
 		floor_ismc->AddInstance(floor);
 		floor.SetRotation(FQuat::MakeFromEuler(FVector(0, 180, 0)));
 		floor.AddToTranslation(FVector(0, 0, 500));
-		floor_ismc->AddInstance(floor);
+		ceil_ismc->AddInstance(floor);
 
 		/* Place doors in the world */
 		TArray<FTransform> doorPos = cur->GetDoorTransforms();

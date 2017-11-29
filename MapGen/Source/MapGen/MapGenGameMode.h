@@ -15,6 +15,7 @@ class MAPGEN_API AMapGenGameMode : public AGameModeBase {
 
 private:
 	UStaticMesh* floor_mesh;
+	UStaticMesh* ceil_mesh;
 	UStaticMesh* door_mesh;
 	UStaticMesh* wall_mesh;
 	AMapLayout* map_layout;

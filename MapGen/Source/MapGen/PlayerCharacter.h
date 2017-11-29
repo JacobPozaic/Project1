@@ -19,9 +19,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void MoveForward(float Val);
+	void MoveForward(float distance);
 	UFUNCTION()
-	void MoveRight(float Val);
+	void MoveRight(float distance);
+	UFUNCTION()
+	void MoveUp(float distance);
+	UFUNCTION()
+	void ToggleFlying();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 };

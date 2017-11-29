@@ -58,6 +58,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 		UStaticMesh* floor_mesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+		UStaticMesh* ceil_mesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 		UStaticMesh* door_mesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 		UStaticMesh* wall_mesh;
@@ -65,12 +67,14 @@ public:
 	UPROPERTY()
 		UInstancedStaticMeshComponent* floor_ismc;
 	UPROPERTY()
+		UInstancedStaticMeshComponent* ceil_ismc;
+	UPROPERTY()
 		UInstancedStaticMeshComponent* door_ismc;
 	UPROPERTY()
 		UInstancedStaticMeshComponent* wall_ismc;
 
 	AMapLayout();
-	void Init(UStaticMesh* floor_mesh, UStaticMesh* door_mesh, UStaticMesh* wall_mesh);
+	void Init(UStaticMesh* floor_mesh, UStaticMesh* ceil_mesh, UStaticMesh* door_mesh, UStaticMesh* wall_mesh);
 	void GenerateMap();
 
 private:
