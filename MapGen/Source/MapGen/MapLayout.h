@@ -47,13 +47,13 @@ public:
 		float PATH_POINT_DIST = 6.0f;
 	/* The maximum amount of tiles in a room that should be occupied by obstacles */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
-		float ROOM_COVERAGE_MAX = 0.35f;
+		float ROOM_COVERAGE_MAX = 0.50f;
 	/* The ratio between room width and the largest wall peice that can be placed in the room */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
-		float RAND_WALL_WIDTH_SIZE_RATIO = 0.25f;
+		float RAND_WALL_WIDTH_SIZE_RATIO = 0.15f;
 	/* The ratio between room length and the largest wall peice that can be placed in the room */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room Generation")
-		float RAND_WALL_LENGTH_SIZE_RATIO = 0.25f;
+		float RAND_WALL_LENGTH_SIZE_RATIO = 0.15f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 		UStaticMesh* floor_mesh;

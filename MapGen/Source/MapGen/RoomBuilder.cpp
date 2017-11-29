@@ -171,10 +171,9 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 
 		/* Randomly add other hazards where they will not block the player from navigating the room */
 		while (room_layout->Coverage() < map_layout->ROOM_COVERAGE_MAX) {
-			int32 rand = FMath::RandRange(0, 350);
-			if (rand < 100) {
+			int32 rand = FMath::RandRange(0, 300);
+			if (rand < 50) {
 				/* Place barrels */
-				int32 RAND_BARREL_CHANCE = 0.5f;
 				TArray<Pos> pos;
 				for (int32 x = 1; x < map_layout->ROOM_WIDTH - 1; x++)
 					for (int32 y = 1; y < map_layout->ROOM_LENGTH - 1; y++)
@@ -182,17 +181,16 @@ void FRoomBuilder::PopulateRoom(FMapGenParameters* map_layout, URoom* room) {
 							pos.Add(Pos(x, y));
 				int32 rand = FMath::RandRange(0, pos.Num() - 1);
 				room_layout->SetTile(pos[rand].x, pos[rand].y, BARREL);
-			} else if (rand < 200) {
-					/* Place crates */
-					int32 RAND_CRATE_CHANCE = 0.5f;
-					TArray<Pos> pos;
-					for (int32 x = 1; x < map_layout->ROOM_WIDTH - 1; x++)
-						for (int32 y = 1; y < map_layout->ROOM_LENGTH - 1; y++)
-							if (room_layout->GetTile(x, y) == EMPTY)
-								pos.Add(Pos(x, y));
-					int32 rand = FMath::RandRange(0, pos.Num() - 1);
-					room_layout->SetTile(pos[rand].x, pos[rand].y, CRATE);
-			} else if (rand < 300) {
+			} else if (rand < 100) {
+				/* Place crates */
+				TArray<Pos> pos;
+				for (int32 x = 1; x < map_layout->ROOM_WIDTH - 1; x++)
+					for (int32 y = 1; y < map_layout->ROOM_LENGTH - 1; y++)
+						if (room_layout->GetTile(x, y) == EMPTY)
+							pos.Add(Pos(x, y));
+				int32 rand = FMath::RandRange(0, pos.Num() - 1);
+				room_layout->SetTile(pos[rand].x, pos[rand].y, CRATE);
+			} else if (rand < 250) {
 				/* Place walls */
 				int32 wall_width = FMath::RandRange(1, (int32)(width *  map_layout->RAND_WALL_WIDTH_SIZE_RATIO));
 				int32 wall_length = FMath::RandRange(1, (int32)(length *  map_layout->RAND_WALL_LENGTH_SIZE_RATIO));
@@ -255,6 +253,7 @@ Pos FRoomBuilder::GetClosestPoint(Pos start, TArray<Pos>* points) {
 }
 
 TArray<FCoord> FRoomBuilder::AddTorches(FMapGenParameters* map_layout, FGrid* room_layout) {
+	/* Find all valid positions for a torch */
 	int32 torch_range = 5;
 	TArray<FCoord> torch_possible_locations;
 	for (int32 x = 1; x < map_layout->ROOM_WIDTH - 1; x++) {
@@ -277,20 +276,30 @@ TArray<FCoord> FRoomBuilder::AddTorches(FMapGenParameters* map_layout, FGrid* ro
 		}
 	}
 
+	TArray<FCoord> shuffled;
+	/* Shuffle the possible torch locations so that torches are more randomly distributed and remove 25% of the possible torches */
+	while (torch_possible_locations.Num() > 0) {
+		if (FMath::RandRange(0, 100) <= 25) continue;
+		int32 index = FMath::RandRange(0, torch_possible_locations.Num() - 1);
+		shuffled.Add(torch_possible_locations[index]);
+		torch_possible_locations.RemoveAt(index);
+	}
+
+	/* Check if the torch is in range of any other torches, if not then place it */
 	TArray<FCoord> torch_locations;
-	for (FCoord torch : torch_possible_locations) {
+	for (FCoord torch : shuffled) {
 		bool torch_in_range = false;
 		for (int32 range_x = torch.x - torch_range; range_x < torch.x + torch_range; range_x++) {
 			if (torch_in_range) break;
 			for (int32 range_y = torch.y - torch_range; range_y < torch.y + torch_range; range_y++) {
 				if (torch_in_range) break;
-				if (range_x >= 1 && range_x <= map_layout->ROOM_WIDTH - 1 && range_y >= 1 && range_y <= map_layout->ROOM_LENGTH - 1)
+				if (range_x >= 0 && range_x < map_layout->ROOM_WIDTH && range_y >= 0 && range_y <= map_layout->ROOM_LENGTH)
 					if (room_layout->GetTile(range_x, range_y) == TORCH)
 						torch_in_range = true;
 			}
 		}
 
-		if (!torch_in_range && FMath::RandRange(0.0f, 1.0f) < 0.2f) {
+		if (!torch_in_range) {
 			room_layout->SetTile(torch.x, torch.y, TORCH);
 			torch_locations.Add(torch);
 		}
